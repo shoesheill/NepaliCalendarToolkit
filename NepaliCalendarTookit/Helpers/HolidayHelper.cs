@@ -37,8 +37,10 @@ public static class HolidayHelper
             if (month.HasValue)
             {
                 // Get the start and end date of the Nepali month in AD
-                var (startDate, endDate) = NepaliCalendarConverter.GetStartAndEndDateInAD(year, month.Value);
-
+                var (startDateString, endDateString) =
+                    NepaliCalendarConverter.GetStartAndEndDateInAD(year, month.Value);
+                DateTime.TryParse(startDateString, out var startDate);
+                DateTime.TryParse(endDateString, out var endDate);
                 // Loop through all days in the month
                 for (var date = startDate; date <= endDate; date = date.AddDays(1))
                     if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
@@ -59,8 +61,9 @@ public static class HolidayHelper
                 // Loop through all 12 months
                 for (var m = 1; m <= 12; m++)
                 {
-                    var (startDate, endDate) = NepaliCalendarConverter.GetStartAndEndDateInAD(year, m);
-
+                    var (startDateString, endDateString) = NepaliCalendarConverter.GetStartAndEndDateInAD(year, m);
+                    DateTime.TryParse(startDateString, out var startDate);
+                    DateTime.TryParse(endDateString, out var endDate);
                     for (var date = startDate; date <= endDate; date = date.AddDays(1))
                         if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                         {

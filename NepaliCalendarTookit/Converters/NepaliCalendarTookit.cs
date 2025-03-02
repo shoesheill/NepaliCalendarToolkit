@@ -42,7 +42,7 @@ public static class NepaliCalendarConverter
         return startDate.AddDays(daysToAdd);
     }
 
-    public static (DateTime StartDate, DateTime EndDate) GetStartAndEndDateInAD(int yearBs, int monthBs)
+    public static (string StartDate, string EndDate) GetStartAndEndDateInAD(int yearBs, int monthBs)
     {
         if (!CalendarUtilities.IsValidNepaliMonth(yearBs, monthBs))
             throw new ArgumentException("Invalid year or month");
@@ -54,10 +54,10 @@ public static class NepaliCalendarConverter
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
 
-        return (startDate, endDate);
+        return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
-    public static (DateTime StartDate, DateTime EndDate) GetQuarterDateRangeInAD(int yearBs, int quarter)
+    public static (string StartDate, string EndDate) GetQuarterDateRangeInAD(int yearBs, int quarter)
     {
         if (quarter < 1 || quarter > 4)
             throw new ArgumentException("Quarter must be between 1 and 4");
@@ -93,10 +93,10 @@ public static class NepaliCalendarConverter
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
 
-        return (startDate, endDate);
+        return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
-    public static (DateTime StartDate, DateTime EndDate) GetMonthRangeDateInAD(int yearBs, int startMonth,
+    public static (string StartDate, string EndDate) GetMonthRangeDateInAD(int yearBs, int startMonth,
         int endMonth)
     {
         if (!CalendarUtilities.IsValidNepaliMonth(yearBs, startMonth) ||
@@ -113,7 +113,7 @@ public static class NepaliCalendarConverter
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
 
-        return (startDate, endDate);
+        return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
     public static List<HolidayInfo> GetHolidaysAndWeekends(int year, int? month = null,
