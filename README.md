@@ -3,7 +3,7 @@
 This document provides an overview of the `NepaliCalendarConverter` class, detailing its methods, their implementations, and sample responses.
 
 ```csharp
-dotnet add package NepaliCalendarTookit 
+dotnet add package NepaliCalendarToolkit 
 ```
 ## Methods
 
