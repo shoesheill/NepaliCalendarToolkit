@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E8FAD8DD-1422-4547-A593-869BFF50A50A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NepaliCalendarTookit", "NepaliCalendarTookit\NepaliCalendarTookit.csproj", "{5A33DCA9-67CE-4467-B8F4-E0D86F5377C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NepaliCalendarToolkit", "NepaliCalendarToolkit\NepaliCalendarToolkit.csproj", "{5A33DCA9-67CE-4467-B8F4-E0D86F5377C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

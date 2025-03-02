@@ -14,13 +14,13 @@ dotnet add package NepaliCalendarTookit
 **Implementation:**
 
 ```csharp
-DateTime dateInAD = new DateTime(2023, 10, 1);
+DateTime dateInAD = new DateTime(2024, 10, 1);
 NepaliDate nepaliDate = NepaliCalendarConverter.ConvertToNepali(dateInAD);
 ```
 Response:
 ```json
 {
-  "Year": 2080,
+  "Year": 2081,
   "Month": 6,
   "Day": 15
 }
@@ -184,6 +184,3 @@ List<HolidayInfo> { ... } // Contains holiday information for the year 2080
     }
   ]
 }
-```## Release Notes
-### Version main
-Released on 
