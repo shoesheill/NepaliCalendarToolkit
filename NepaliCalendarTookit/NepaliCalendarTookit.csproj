@@ -17,4 +17,17 @@
         <LangVersion>10.0</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <RootNamespace>NepaliCalendarTookit</RootNamespace>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Authors>Sushil Shrestha</Authors>
+        <Description>This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including conversion and utilities for date management.</Description>
+        <PackageTags>nepali calendar; date conversion; nepali date; calendar toolkit; date utilities; nepali festivals; lunar calendar; date management;</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/shoesheill/NepaliCalendarToolkit.git/</RepositoryUrl>
+        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <PackageId>NepaliCalendarTookit</PackageId>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
 </Project>
