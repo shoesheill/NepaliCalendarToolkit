@@ -187,3 +187,6 @@ List<HolidayInfo> { ... } // Contains holiday information for the year 2080
 ## Release Notes
 ### Version main
 Released on 
+## Release Notes
+### Version main
+Released on 
