@@ -28,7 +28,13 @@
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
         <PackageId>NepaliCalendarTookit</PackageId>
         <Version>1.0.0</Version>
-        <PackageReadmeFile>\..\README.md</PackageReadmeFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)/../README.md" Pack="true" PackagePath="\"/>
+        <!-- or if README is in the same directory as the project file -->
+        <!-- <None Include="README.md" Pack="true" PackagePath="\" /> -->
+    </ItemGroup>
 
 </Project>
