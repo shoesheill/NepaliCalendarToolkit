@@ -10,8 +10,9 @@ public class HolidayInfo
         BsDate = bsDate;
     }
 
-    public string DayName { get; }
-    public string HolidayName { get; }
-    public DateTime AdDate { get; }
-    public string BsDate { get; }
+    private string DayName { get; }
+    private string HolidayName { get; }
+    private DateTime AdDate { get; }
+    private string BsDate { get; }
+    public DateTime GetAdDate => AdDate;
 }
