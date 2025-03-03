@@ -72,13 +72,13 @@ public class CalendarUtilities
 
     internal static bool IsValidNepaliDate(NepaliDate date)
     {
-        if (!MonthLengths.Lengths.ContainsKey(date.Year))
+        if (!MonthLengths.Lengths.ContainsKey(date.GetYear))
             return false;
 
-        if (date.Month < 1 || date.Month > 12)
+        if (date.GetMonth < 1 || date.GetMonth > 12)
             return false;
 
-        if (date.Day < 1 || date.Day > MonthLengths.Lengths[date.Year][date.Month - 1])
+        if (date.GetDay < 1 || date.GetDay > MonthLengths.Lengths[date.GetDay][date.GetMonth - 1])
             return false;
 
         return true;
