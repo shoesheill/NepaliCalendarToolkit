@@ -10,12 +10,7 @@ public static class NepaliCalendarConverter
         if (npYear == -1) throw new ArgumentOutOfRangeException("Date is outside the supported range.");
 
         var npMonthAndDate = CalendarUtilities.GetMonthAndDate(npYear, ad);
-        return new NepaliDate
-        {
-            Year = npYear,
-            Month = npMonthAndDate.Month,
-            Day = npMonthAndDate.Day
-        };
+        return new NepaliDate(npYear, npMonthAndDate.Month, npMonthAndDate.Day);
     }
 
     public static DateTime ConvertToAD(NepaliDate nepaliDate)
@@ -24,20 +19,20 @@ public static class NepaliCalendarConverter
             throw new ArgumentException("Invalid Nepali date");
 
         // Get the start date of the Nepali year
-        if (!YearStart.Dates.ContainsKey(nepaliDate.Year))
+        if (!YearStart.Dates.ContainsKey(nepaliDate.GetYear))
             throw new ArgumentOutOfRangeException("Year is outside the supported range");
 
-        var startDate = DateTime.ParseExact(YearStart.Dates[nepaliDate.Year], "yyyy-MM-dd",
+        var startDate = DateTime.ParseExact(YearStart.Dates[nepaliDate.GetYear], "yyyy-MM-dd",
             CultureInfo.InvariantCulture);
 
         // Calculate days to add based on months and days
         var daysToAdd = 0;
 
         // Add days for full months
-        for (var i = 0; i < nepaliDate.Month - 1; i++) daysToAdd += MonthLengths.Lengths[nepaliDate.Year][i];
+        for (var i = 0; i < nepaliDate.GetMonth - 1; i++) daysToAdd += MonthLengths.Lengths[nepaliDate.GetYear][i];
 
         // Add remaining days
-        daysToAdd += nepaliDate.Day - 1;
+        daysToAdd += nepaliDate.GetDay - 1;
 
         return startDate.AddDays(daysToAdd);
     }
@@ -47,13 +42,10 @@ public static class NepaliCalendarConverter
         if (!CalendarUtilities.IsValidNepaliMonth(yearBs, monthBs))
             throw new ArgumentException("Invalid year or month");
 
-        var startNepaliDate = new NepaliDate { Year = yearBs, Month = monthBs, Day = 1 };
-        var endNepaliDate = new NepaliDate
-            { Year = yearBs, Month = monthBs, Day = MonthLengths.Lengths[yearBs][monthBs - 1] };
-
+        var startNepaliDate = new NepaliDate(yearBs, monthBs, 1);
+        var endNepaliDate = new NepaliDate(yearBs, monthBs, MonthLengths.Lengths[yearBs][monthBs - 1]);
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
-
         return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
@@ -86,13 +78,10 @@ public static class NepaliCalendarConverter
                 throw new ArgumentException("Invalid quarter");
         }
 
-        var startNepaliDate = new NepaliDate { Year = yearBs, Month = startMonth, Day = 1 };
-        var endNepaliDate = new NepaliDate
-            { Year = yearBs, Month = endMonth, Day = MonthLengths.Lengths[yearBs][endMonth - 1] };
-
+        var startNepaliDate = new NepaliDate(yearBs, startMonth, 1);
+        var endNepaliDate = new NepaliDate(yearBs, endMonth, MonthLengths.Lengths[yearBs][endMonth - 1]);
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
-
         return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
@@ -106,13 +95,10 @@ public static class NepaliCalendarConverter
         if (startMonth > endMonth)
             throw new ArgumentException("Start month cannot be greater than end month");
 
-        var startNepaliDate = new NepaliDate { Year = yearBs, Month = startMonth, Day = 1 };
-        var endNepaliDate = new NepaliDate
-            { Year = yearBs, Month = endMonth, Day = MonthLengths.Lengths[yearBs][endMonth - 1] };
-
+        var startNepaliDate = new NepaliDate(yearBs, startMonth, 1);
+        var endNepaliDate = new NepaliDate(yearBs, endMonth, MonthLengths.Lengths[yearBs][endMonth - 1]);
         var startDate = ConvertToAD(startNepaliDate);
         var endDate = ConvertToAD(endNepaliDate);
-
         return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
