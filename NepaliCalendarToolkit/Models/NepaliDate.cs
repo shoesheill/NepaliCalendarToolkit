@@ -1,9 +1,19 @@
 public class NepaliDate
 {
-    public int Year { get; set; }
+    public NepaliDate(int year, int month, int day)
+    {
+        Year = year;
+        Month = month;
+        Day = day;
+    }
 
-    public int Month { get; set; }
-    public int Day { get; set; }
+    private int Year { get; }
+
+    private int Month { get; }
+    private int Day { get; }
+    public int GetYear => Year;
+    public int GetMonth => Month;
+    public int GetDay => Day;
 
     public override string ToString()
     {
