@@ -19,14 +19,14 @@ public static class HolidayHelper
                     if (month == null || holiday.Month == month.Value)
                     {
                         var nepaliDate = new NepaliDate
-                            { Year = year, Month = holiday.Month, Day = holiday.Day };
+                            (year, holiday.Month, holiday.Day);
                         var adDate = NepaliCalendarConverter.ConvertToAD(nepaliDate);
                         var dayName = adDate.DayOfWeek.ToString(); // Get the day name from the AD date
                         results.Add(new HolidayInfo(
                             dayName, // Use the calculated day name
                             holiday.Name,
                             adDate,
-                            $"{nepaliDate.Year}-{nepaliDate.Month:D2}-{nepaliDate.Day:D2}" // Format BS date
+                            nepaliDate.ToString() // Format BS date
                         ));
                     }
             }
@@ -52,7 +52,7 @@ public static class HolidayHelper
                             weekendType,
                             string.Empty,
                             date,
-                            $"{nepaliDate.Year}-{nepaliDate.Month:D2}-{nepaliDate.Day:D2}" // Format BS date
+                            nepaliDate.ToString() // Format BS date
                         ));
                     }
             }
@@ -73,7 +73,7 @@ public static class HolidayHelper
                                 weekendType,
                                 string.Empty,
                                 date,
-                                $"{nepaliDate.Year}-{nepaliDate.Month:D2}-{nepaliDate.Day:D2}" // Format BS date
+                                nepaliDate.ToString() // Format BS date
                             ));
                         }
                 }
@@ -81,7 +81,7 @@ public static class HolidayHelper
         }
 
         // Sort results by date
-        var sortedResults = results.OrderBy(r => r.AdDate).ToList();
+        var sortedResults = results.OrderBy(r => r.GetAdDate).ToList();
 
         return sortedResults;
     }
