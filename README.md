@@ -1,10 +1,95 @@
-# NepaliCalendarToolkit
+# Nepali Calendar Toolkit
 
-This document provides an overview of the `NepaliCalendarConverter` class, detailing its methods, their implementations, and sample responses.
+This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including Nepali public holidays and weekends from 2065 BS - 2081 BS.
+
+## Features
+
+- Convert between Nepali (Bikram Sambat) and Gregorian (AD) dates
+- Get Nepali public holidays
+- Calculate weekends for Nepali dates
+- Work with Nepali fiscal years (starts on Shrawan 1st and ends on Ashar end)
+- Get date ranges for Nepali months, quarters, and fiscal years
+- JSON-based holiday data storage
+
+## Installation
+
+```
+Install-Package NepaliCalendarToolkit
+```
+
+Or using the .NET CLI:
+
+```
+dotnet add package NepaliCalendarToolkit
+```
+
+## Usage
+
+### Initialize Holiday JSON Files (Optional)
 
 ```csharp
-dotnet add package NepaliCalendarToolkit 
+// Call this once at application startup if you want to use JSON files
+NepaliCalendarConverter.InitializeHolidayJsonFiles();
 ```
+
+### Get Holidays and Weekends
+
+```csharp
+// Get all holidays and weekends for a specific year
+var holidaysAndWeekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2080);
+
+// Get only holidays for a specific month in a year
+var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOrWeekendEnum.Holidays);
+
+// Get only weekends for a specific month in a year
+var weekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOrWeekendEnum.Weekends);
+```
+
+### Date Conversion
+
+```csharp
+// Convert from Nepali date to Gregorian date
+var nepaliDate = new NepaliDate(2080, 1, 1);
+var gregorianDate = NepaliCalendarConverter.ConvertToAD(nepaliDate);
+
+// Convert from Gregorian date to Nepali date
+var gregorianDate = new DateTime(2023, 4, 14);
+var nepaliDate = NepaliCalendarConverter.ConvertToNepali(gregorianDate);
+```
+
+### Fiscal Year Operations
+
+```csharp
+// Get date range for a Nepali fiscal year
+var fiscalYearRange = NepaliCalendarConverter.GetFiscalYearDateRangeInAD(2080);
+// Result: StartDate: 2023-07-17, EndDate: 2024-07-15
+
+// Get holidays for a fiscal year
+var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscalYear(2080);
+```
+
+## Holiday Data Structure
+
+The toolkit now stores holiday data in JSON files (in the Data/Holidays directory) with the following structure:
+
+```json
+[
+  {
+    "month": 1,
+    "day": 11,
+    "date": "2008-04-23",
+    "name": "Loktantra Diwas"
+  }
+  // More holidays...
+]
+```
+
+Each year has its own JSON file named with the BS year (e.g., "2080.json").
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
 ## Methods
 
 ### 1. ConvertToNepali
@@ -17,7 +102,9 @@ dotnet add package NepaliCalendarToolkit
 DateTime dateInAD = new DateTime(2024, 10, 1);
 NepaliDate nepaliDate = NepaliCalendarConverter.ConvertToNepali(dateInAD);
 ```
+
 Response:
+
 ```json
 {
   "Year": 2081,
@@ -25,7 +112,6 @@ Response:
   "Day": 15
 }
 ```
-
 
 ### 2. ConvertToAD
 
@@ -38,6 +124,7 @@ csharp
 NepaliDate nepaliDate = new NepaliDate { Year = 2080, Month = 6, Day = 15 };
 DateTime dateInAD = NepaliCalendarConverter.ConvertToAD(nepaliDate);
 ```
+
 2023-10-01 00:00:00
 
 ### 3. GetStartAndEndDateInAD
@@ -49,7 +136,9 @@ DateTime dateInAD = NepaliCalendarConverter.ConvertToAD(nepaliDate);
 ```csharp
 var dateRange = NepaliCalendarConverter.GetStartAndEndDateInAD(2080, 6);
 ```
+
 Response:
+
 ```json
 {
   "StartDate": "2023-09-17",
@@ -66,7 +155,9 @@ Response:
 ```csharp
 var quarterRange = NepaliCalendarConverter.GetQuarterDateRangeInAD(2080, 1);
 ```
+
 Response:
+
 ```json
 {
   "StartDate": "2023-07-01",
@@ -83,7 +174,9 @@ Response:
 ```csharp
 var monthRange = NepaliCalendarConverter.GetMonthRangeDateInAD(2080, 6, 8);
 ```
+
 Response:
+
 ```json
 {
   "StartDate": "2023-09-17",
@@ -100,99 +193,44 @@ Response:
 ```csharp
 var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2080);
 ```
+
 Response:
+
 ```csharp
 List<HolidayInfo> { ... } // Contains holiday information for the year 2080
 ```
+
+### 7. GetFiscalYearDateRangeInAD
+
+**Description:** Retrieves the start and end dates in AD for a given Nepali fiscal year.
+
+**Implementation:**
+
+```csharp
+var fiscalYearRange = NepaliCalendarConverter.GetFiscalYearDateRangeInAD(2080);
+```
+
+Response:
+
 ```json
 {
-  "Holidays": [
-    {
-      "Date": "2023-09-17",
-      "Day": "Sunday",
-      "Holiday": "Constitution Day"
-    },
-    {
-      "Date": "2023-10-01",
-      "Day": "Sunday",
-      "Holiday": "Ghatasthapana"
-    },
-    {
-      "Date": "2023-10-11",
-      "Day": "Wednesday",
-      "Holiday": "Fulpati"
-    },
-    {
-      "Date": "2023-10-15",
-      "Day": "Sunday",
-      "Holiday": "Maha Asthami"
-    },
-    {
-      "Date": "2023-10-16",
-      "Day": "Monday",
-      "Holiday": "Maha Navami"
-    },
-    {
-      "Date": "2023-10-17",
-      "Day": "Tuesday",
-      "Holiday": "Vijaya Dashami"
-    },
-    {
-      "Date": "2023-10-18",
-      "Day": "Wednesday",
-      "Holiday": "Ekadashi"
-    },
-    {
-      "Date": "2023-10-19",
-      "Day": "Thursday",
-      "Holiday": "Dwadashi"
-    },
-    {
-      "Date": "2023-10-20",
-      "Day": "Friday",
-      "Holiday": "Kojagrat Purnima"
-    },
-    {
-      "Date": "2023-10-21",
-      "Day": "Saturday",
-      "Holiday": "Tihar"
-    },
-    {
-      "Date": "2023-10-22",
-      "Day": "Sunday",
-      "Holiday": "Tihar"
-    },
-    {
-      "Date": "2023-10-23",
-      "Day": "Monday",
-      "Holiday": "Tihar"
-    },
-    {
-      "Date": "2023-10-24",
-      "Day": "Tuesday",
-      "Holiday": "Tihar"
-    },
-    {
-      "Date": "2023-10-25",
-      "Day": "Wednesday",
-      "Holiday": "Tihar"
-    },
-    {
-      "Date": "2023-10-26",
-      "Day": "Thursday",
-      "Holiday": "Tihar"
-    }
-  ]
+  "StartDate": "2023-07-17",
+  "EndDate": "2024-07-15"
 }
-## Release Notes
-### Version main
-Released on 
-## Release Notes
-### Version main
-Released on 
-## Release Notes
-### Version main
-Released on 
-## Release Notes
-### Version main
-Released on 
+```
+
+### 8. GetHolidaysAndWeekendsForFiscalYear
+
+**Description:** Retrieves a list of holidays and weekends for a specified fiscal year.
+
+**Implementation:**
+
+```csharp
+var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscalYear(2080);
+```
+
+Response:
+
+```csharp
+List<HolidayInfo> { ... } // Contains holiday information for the fiscal year 2080-81
+```

@@ -1,0 +1,34 @@
+[
+  { "month": 1, "day": 12, "date": "2021-04-25", "name": "Mahabir Jayanti (Jain only)" }, // Baisakh
+  { "month": 2, "day": 12, "date": "2021-05-26", "name": "Buddha Jayanti" }, // Jestha
+  { "month": 2, "day": 12, "date": "2021-05-26", "name": "Ubhauli Parba" }, // Jestha
+  { "month": 2, "day": 15, "date": "2021-05-29", "name": "Republic Day" }, // Jestha
+  { "month": 5, "day": 7, "date": "2021-08-23", "name": "Goyaatraa (Gaaiijaatraa) Saapaaru" }, // Bhadra
+  { "month": 5, "day": 24, "date": "2021-09-09", "name": "Haritalika Teej Brata (Women only)" }, // Bhadra
+  { "month": 6, "day": 3, "date": "2021-09-19", "name": "Constitution Day" }, // Ashwin
+  { "month": 6, "day": 21, "date": "2021-10-07", "name": "Ghatasthapana (Na:laa Swone)" }, // Ashwin
+  { "month": 6, "day": 26, "date": "2021-10-12", "name": "Phulpati" }, // Ashwin
+  { "month": 6, "day": 27, "date": "2021-10-13", "name": "Mahaastami Barta" }, // Ashwin
+  { "month": 6, "day": 28, "date": "2021-10-14", "name": "Mahanawami" }, // Ashwin
+  { "month": 6, "day": 29, "date": "2021-10-15", "name": "Vijaya Dashami (Dashainko Tika)" }, // Ashwin
+  { "month": 7, "day": 18, "date": "2021-11-04", "name": "Dipawali (Laxmi Puja)" }, // Kartik
+  { "month": 7, "day": 19, "date": "2021-11-05", "name": "Gobardhan Pooja" }, // Kartik
+  { "month": 7, "day": 20, "date": "2021-11-06", "name": "Bhai Tika (Kija Puja)" }, // Kartik
+  { "month": 7, "day": 24, "date": "2021-11-10", "name": "Chhath Parba" }, // Kartik
+  { "month": 7, "day": 25, "date": "2021-11-11", "name": "Falgunanda Jayanti (Kirat only)" }, // Kartik
+  { "month": 8, "day": 3, "date": "2021-11-19", "name": "Guru Nanak Jayanti (Sikh only)" }, // Mangsir
+  { "month": 8, "day": 17, "date": "2021-12-03", "name": "International Day of Persons with Disabilities (Differently abled only)" }, // Mangsir
+  { "month": 9, "day": 4, "date": "2021-12-19", "name": "Yo:mari Punhi" }, // Poush
+  { "month": 9, "day": 4, "date": "2021-12-19", "name": "Udhauli Parwa" }, // Poush
+  { "month": 9, "day": 4, "date": "2021-12-19", "name": "Dhanya Purnima" }, // Poush
+  { "month": 9, "day": 15, "date": "2021-12-30", "name": "Tamu (Gurung) Lhosar" }, // Poush
+  { "month": 10, "day": 1, "date": "2022-01-15", "name": "Maghi Parwa(Tharu, Magar, chhantyaalaadiko parba)" }, // Magh
+  { "month": 10, "day": 1, "date": "2022-01-15", "name": "Maghe Sankranti" }, // Magh
+  { "month": 10, "day": 19, "date": "2022-02-02", "name": "Sonam (Tamang) Lhosar" }, // Magh
+  { "month": 11, "day": 7, "date": "2022-02-19", "name": "National Democracy Day" }, // Falgun
+  { "month": 11, "day": 17, "date": "2022-03-01", "name": "Maha Shivaratri Chaturdasi Brat" }, // Falgun
+  { "month": 11, "day": 17, "date": "2022-03-01", "name": "Maha Shivaratri" }, // Falgun
+  { "month": 12, "day": 3, "date": "2022-03-17", "name": "Fagu Purnima" }, // Chaitra
+  { "month": 12, "day": 4, "date": "2022-03-18", "name": "Terai Holi" }, // Chaitra
+  { "month": 12, "day": 18, "date": "2022-04-01", "name": "Ghode Jatra (KTM valley only)" } // Chaitra
+]

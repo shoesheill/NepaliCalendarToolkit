@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;netstandard2.1;net9.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+      </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <LangVersion>7.3</LangVersion>
@@ -27,7 +27,7 @@
         <RepositoryUrl>https://github.com/shoesheill/NepaliCalendarToolkit.git</RepositoryUrl>
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
         <PackageId>NepaliCalendarToolkit</PackageId>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
@@ -35,6 +35,22 @@
         <None Include="$(MSBuildThisFileDirectory)/../README.md" Pack="true" PackagePath="\"/>
         <!-- or if README is in the same directory as the project file -->
         <!-- <None Include="README.md" Pack="true" PackagePath="\" /> -->
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Data\Holidays\*.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Data\month-lengths.json" />
+        <EmbeddedResource Include="Data\year-start.json" />
     </ItemGroup>
 
 </Project>

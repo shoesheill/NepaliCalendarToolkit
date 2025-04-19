@@ -1,0 +1,27 @@
+[
+  { "month": 2, "day": 4, "date": "2019-05-18", "name": "Buddha Jayanti" }, // Jestha
+  { "month": 5, "day": 16, "date": "2019-09-02", "name": "Haritalika Teej Brata (Women only)" }, // Bhadra
+  { "month": 5, "day": 27, "date": "2019-09-13", "name": "Indrajatra(Swachyaa) (Kumari-Bhairab Ganesh ko Raath Jaatraa)" }, // Bhadra
+  { "month": 6, "day": 3, "date": "2019-09-20", "name": "Constitution Day" }, // Ashwin
+  { "month": 6, "day": 5, "date": "2019-09-22", "name": "Jitiya Parwa (Women celebrating Jitiya Parwa Only)" }, // Ashwin
+  { "month": 6, "day": 18, "date": "2019-10-05", "name": "Phulpati" }, // Ashwin
+  { "month": 6, "day": 19, "date": "2019-10-06", "name": "Mahaastami Barta" }, // Ashwin
+  { "month": 6, "day": 20, "date": "2019-10-07", "name": "Mahanawami" }, // Ashwin
+  { "month": 6, "day": 21, "date": "2019-10-08", "name": "Vijaya Dashami (Dashainko Tika)" }, // Ashwin
+  { "month": 7, "day": 10, "date": "2019-10-27", "name": "Dipawali (Laxmi Puja)" }, // Kartik
+  { "month": 7, "day": 11, "date": "2019-10-28", "name": "Mha Pooja" }, // Kartik
+  { "month": 7, "day": 12, "date": "2019-10-29", "name": "Bhai Tika (Kija Puja)" }, // Kartik
+  { "month": 7, "day": 16, "date": "2019-11-02", "name": "Chhath Parba" }, // Kartik
+  { "month": 7, "day": 25, "date": "2019-11-11", "name": "Falgunanda Jayanti (Kirat only)" }, // Kartik
+  { "month": 7, "day": 26, "date": "2019-11-12", "name": "Guru Nanak Jayanti (Sikh only)" }, // Kartik
+  { "month": 8, "day": 17, "date": "2019-12-03", "name": "International Day of Persons with Disabilities (Differently abled only)" }, // Mangsir
+  { "month": 8, "day": 26, "date": "2019-12-12", "name": "Udhauli Parwa" }, // Mangsir
+  { "month": 9, "day": 9, "date": "2019-12-25", "name": "Christmas (Christian only)" }, // Poush
+  { "month": 9, "day": 15, "date": "2019-12-31", "name": "Tamu (Gurung) Lhosar" }, // Poush
+  { "month": 10, "day": 1, "date": "2020-01-15", "name": "Maghe Sankranti" }, // Magh
+  { "month": 10, "day": 11, "date": "2020-01-25", "name": "Sonam (Tamang) Lhosar" }, // Magh
+  { "month": 11, "day": 9, "date": "2020-02-21", "name": "Maha Shivaratri Chaturdasi Brat" }, // Falgun
+  { "month": 11, "day": 12, "date": "2020-02-24", "name": "Gyalpo Lhosar" }, // Falgun
+  { "month": 11, "day": 26, "date": "2020-03-09", "name": "Fagu Purnima" }, // Falgun
+  { "month": 12, "day": 11, "date": "2020-03-24", "name": "Ghode Jatra (KTM valley only)" } // Chaitra
+]
