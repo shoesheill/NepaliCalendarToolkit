@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using NepaliCalendarToolkit.Data;
 
 public class CalendarUtilities
 {
@@ -41,6 +42,15 @@ public class CalendarUtilities
 
     internal static (int Month, int Day) GetMonthAndDate(int year, DateTime date)
     {
+        // Validate year is in the supported range
+        if (!MonthLengths.Lengths.ContainsKey(year))
+        {
+            var supportedYears = string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k));
+            throw new ArgumentOutOfRangeException(
+                nameof(year),
+                $"Year {year} is outside the supported range. Supported years are: {supportedYears}");
+        }
+
         var daysPassed = GetDaysPassed(year, date);
         var monthIndex = -1;
         var dayOfMonth = -1;
@@ -78,7 +88,7 @@ public class CalendarUtilities
         if (date.GetMonth < 1 || date.GetMonth > 12)
             return false;
 
-        if (date.GetDay < 1 || date.GetDay > MonthLengths.Lengths[date.GetDay][date.GetMonth - 1])
+        if (date.GetDay < 1 || date.GetDay > MonthLengths.Lengths[date.GetYear][date.GetMonth - 1])
             return false;
 
         return true;
