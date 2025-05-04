@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.IO;
 using NepaliCalendarToolkit.Helpers;
+using NepaliCalendarToolkit.Models;
 
 public static class HolidayHelper
 {
@@ -11,9 +12,8 @@ public static class HolidayHelper
     {
         // Validate that the year exists in MonthLengths
         if (!MonthLengths.Lengths.ContainsKey(year))
-        {
-            throw new ArgumentException($"Year {year} is not supported. Supported years are: {string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k))}");
-        }
+            throw new ArgumentException(
+                $"Year {year} is not supported. Supported years are: {string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k))}");
 
         var results = new List<HolidayInfo>();
 
@@ -25,27 +25,21 @@ public static class HolidayHelper
 
             // If JSON file doesn't exist, generate it from in-memory data
             if (!holidayList.Any())
-            {
                 // Generate JSON file for this year
                 // HolidayJson.GenerateHolidayJsonFiles();
-
                 // Try loading the JSON file again
                 holidayList = HolidayJson.GetHolidays(year);
-            }
 
             // Log a warning if no holiday data is found for the year
             if (!holidayList.Any())
-            {
                 // You might want to log this situation or handle it as appropriate
-                System.Diagnostics.Debug.WriteLine($"No holiday data found for year {year}");
-            }
+                Debug.WriteLine($"No holiday data found for year {year}");
 
             foreach (var holiday in holidayList)
-            {
                 if (month == null || holiday.Month == month.Value)
                 {
                     var nepaliDate = new NepaliDate(year, holiday.Month, holiday.Day);
-                    var adDate = NepaliCalendarConverter.ConvertToAD(nepaliDate);
+                    var adDate = NepaliCalendarConverter.ConvertToAd(nepaliDate);
                     var dayName = adDate.DayOfWeek.ToString(); // Get the day name from the AD date
 
                     results.Add(new HolidayInfo(
@@ -55,7 +49,6 @@ public static class HolidayHelper
                         nepaliDate.ToString() // Format BS date
                     ));
                 }
-            }
         }
 
         // Add weekends if requested
@@ -65,15 +58,15 @@ public static class HolidayHelper
             {
                 // Get the start and end date of the Nepali month in AD
                 var (startDateString, endDateString) =
-                    NepaliCalendarConverter.GetStartAndEndDateInAd(year, month.Value);
+                    NepaliCalendarConverter.GetMonthDateInAd(year, month.Value);
                 DateTime.TryParse(startDateString, out var startDate);
                 DateTime.TryParse(endDateString, out var endDate);
                 // Loop through all days in the month
                 for (var date = startDate; date <= endDate; date = date.AddDays(1))
-                    if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                    if (WeekendConfiguration.IsWeekend(date.DayOfWeek))
                     {
                         var nepaliDate = NepaliCalendarConverter.ConvertToNepali(date);
-                        var weekendType = date.DayOfWeek == DayOfWeek.Saturday ? "Saturday" : "Sunday";
+                        var weekendType = date.DayOfWeek.ToString();
 
                         results.Add(new HolidayInfo(
                             weekendType,
@@ -88,14 +81,14 @@ public static class HolidayHelper
                 // Loop through all 12 months
                 for (var m = 1; m <= 12; m++)
                 {
-                    var (startDateString, endDateString) = NepaliCalendarConverter.GetStartAndEndDateInAd(year, m);
+                    var (startDateString, endDateString) = NepaliCalendarConverter.GetMonthDateInAd(year, m);
                     DateTime.TryParse(startDateString, out var startDate);
                     DateTime.TryParse(endDateString, out var endDate);
                     for (var date = startDate; date <= endDate; date = date.AddDays(1))
-                        if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                        if (WeekendConfiguration.IsWeekend(date.DayOfWeek))
                         {
                             var nepaliDate = NepaliCalendarConverter.ConvertToNepali(date);
-                            var weekendType = date.DayOfWeek == DayOfWeek.Saturday ? "Saturday" : "Sunday";
+                            var weekendType = date.DayOfWeek.ToString();
                             results.Add(new HolidayInfo(
                                 weekendType,
                                 string.Empty,
@@ -112,7 +105,7 @@ public static class HolidayHelper
     }
 
     /// <summary>
-    /// Gets holidays and weekends for a range of Nepali dates
+    ///     Gets holidays and weekends for a range of Nepali dates
     /// </summary>
     /// <param name="startYear">Start year in BS</param>
     /// <param name="startMonth">Start month in BS</param>
@@ -139,8 +132,8 @@ public static class HolidayHelper
         var endDate = new NepaliDate(endYear, endMonth, endDay);
 
         // Convert Nepali dates to AD for iterating
-        var startDateAD = NepaliCalendarConverter.ConvertToAD(startDate);
-        var endDateAD = NepaliCalendarConverter.ConvertToAD(endDate);
+        var startDateAD = NepaliCalendarConverter.ConvertToAd(startDate);
+        var endDateAD = NepaliCalendarConverter.ConvertToAd(endDate);
 
         // Iterate through each day in the range
         for (var date = startDateAD; date <= endDateAD; date = date.AddDays(1))
@@ -155,35 +148,32 @@ public static class HolidayHelper
             if (returnType == HolidayOrWeekendEnum.Holidays || returnType == HolidayOrWeekendEnum.Both)
             {
                 var holidayList = HolidayJson.GetHolidays(nepaliDate.GetYear);
-                var holiday = holidayList.FirstOrDefault(h => h.Month == nepaliDate.GetMonth && h.Day == nepaliDate.GetDay);
+                var holiday =
+                    holidayList.FirstOrDefault(h => h.Month == nepaliDate.GetMonth && h.Day == nepaliDate.GetDay);
 
                 if (holiday != null)
-                {
                     results.Add(new HolidayInfo(
                         date.DayOfWeek.ToString(),
                         holiday.Name,
                         date,
                         nepaliDate.ToString()
                     ));
-                }
             }
 
             // Add weekends if requested
             if ((returnType == HolidayOrWeekendEnum.Weekends || returnType == HolidayOrWeekendEnum.Both) &&
-                (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday))
+                WeekendConfiguration.IsWeekend(date.DayOfWeek))
             {
-                var weekendType = date.DayOfWeek == DayOfWeek.Saturday ? "Saturday" : "Sunday";
+                var weekendType = date.DayOfWeek.ToString();
 
                 // Check if we already added this date as a holiday
                 if (!results.Any(r => r.GetAdDate == date))
-                {
                     results.Add(new HolidayInfo(
                         weekendType,
                         string.Empty,
                         date,
                         nepaliDate.ToString()
                     ));
-                }
             }
         }
 
