@@ -7,15 +7,6 @@ using NepaliCalendarToolkit;
 public static class NepaliCalendarConverter
 {
     /// <summary>
-    ///     Initializes holiday JSON files and updates the README with the current year range
-    /// </summary>
-    public static void InitializeHolidayJsonFiles()
-    {
-        // Update the README with the current year range based on available JSON files
-        UpdateReadmeVersions.UpdateYearRange();
-    }
-
-    /// <summary>
     ///     Configure which days of the week are considered weekends
     /// </summary>
     /// <param name="weekendDays">Array of days to be considered as weekends</param>

@@ -27,7 +27,7 @@
         <RepositoryUrl>https://github.com/shoesheill/NepaliCalendarToolkit.git</RepositoryUrl>
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
         <PackageId>NepaliCalendarToolkit</PackageId>
-        <Version>1.0.4</Version>
+        <Version>1.1.0</Version>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
