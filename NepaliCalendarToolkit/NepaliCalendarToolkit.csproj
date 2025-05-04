@@ -21,13 +21,13 @@
         <RootNamespace>NepaliCalendarToolkit</RootNamespace>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <Authors>Sushil Shrestha</Authors>
-        <Description>This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including nepali public holidays and weekends from 2065 BS - 2081 BS.</Description>
+        <Description>This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including nepali public holidays and weekends from 2065 BS - 2082 BS.</Description>
         <PackageTags>nepali calendar; date conversion; nepali date; calendar toolkit; date utilities; nepali festivals; lunar calendar; date management;nepali public holidays calendar; nepali weekend calendar; nepali fiscal year calendar; nepali fiscal year quarter calendar;</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/shoesheill/NepaliCalendarToolkit.git</RepositoryUrl>
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
         <PackageId>NepaliCalendarToolkit</PackageId>
-        <Version>1.1.0</Version>
+        <Version>1.1.1</Version>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
