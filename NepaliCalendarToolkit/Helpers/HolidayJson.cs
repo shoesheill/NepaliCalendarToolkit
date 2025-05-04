@@ -1,31 +1,15 @@
-namespace NepaliCalendarToolkit.Helpers
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
+namespace NepaliCalendarToolkit
+{
     public static class HolidayJson
     {
-        private static readonly string HolidayDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Holidays");
-
-        // Holiday model that matches the JSON structure
-        public class HolidayData
-        {
-            [JsonPropertyName("month")]
-            public int Month { get; set; }
-
-            [JsonPropertyName("day")]
-            public int Day { get; set; }
-
-            [JsonPropertyName("date")]
-            public string Date { get; set; }
-
-            [JsonPropertyName("name")]
-            public string Name { get; set; }
-        }
+        private static readonly string HolidayDirectoryPath =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Holidays");
 
         /// <summary>
         ///     Gets a list of all years for which holiday data is available
@@ -35,18 +19,13 @@ namespace NepaliCalendarToolkit.Helpers
         {
             // Create directory if it doesn't exist
             if (!Directory.Exists(HolidayDirectoryPath))
-            {
                 try
                 {
                     // Try alternative paths if standard path doesn't exist
                     var alternativePaths = GetAlternativeHolidayPaths();
                     foreach (var path in alternativePaths)
-                    {
                         if (Directory.Exists(path))
-                        {
                             return GetYearsFromDirectory(path);
-                        }
-                    }
 
                     // No valid directory found
                     return new List<int>();
@@ -56,7 +35,6 @@ namespace NepaliCalendarToolkit.Helpers
                     // Handle any exceptions gracefully
                     return new List<int>();
                 }
-            }
 
             return GetYearsFromDirectory(HolidayDirectoryPath);
         }
@@ -75,10 +53,7 @@ namespace NepaliCalendarToolkit.Helpers
             foreach (var file in jsonFiles)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
-                if (int.TryParse(fileName, out var year))
-                {
-                    result.Add(year);
-                }
+                if (int.TryParse(fileName, out var year)) result.Add(year);
             }
 
             return result;
@@ -95,10 +70,7 @@ namespace NepaliCalendarToolkit.Helpers
             {
                 // Try to look in the executing assembly location
                 var assemblyPath = Path.GetDirectoryName(typeof(HolidayJson).Assembly.Location);
-                if (!string.IsNullOrEmpty(assemblyPath))
-                {
-                    paths.Add(Path.Combine(assemblyPath, "Data", "Holidays"));
-                }
+                if (!string.IsNullOrEmpty(assemblyPath)) paths.Add(Path.Combine(assemblyPath, "Data", "Holidays"));
 
                 // Try current directory
                 var currentDir = Directory.GetCurrentDirectory();
@@ -114,9 +86,7 @@ namespace NepaliCalendarToolkit.Helpers
                     // Try one more level up
                     var parentDirInfo = dirInfo.Parent;
                     if (parentDirInfo != null)
-                    {
                         paths.Add(Path.Combine(parentDirInfo.FullName, "NepaliCalendarToolkit", "Data", "Holidays"));
-                    }
                 }
             }
             catch
@@ -130,15 +100,12 @@ namespace NepaliCalendarToolkit.Helpers
         // Get holidays for a specific year
         public static List<HolidayData> GetHolidays(int year)
         {
-            string filePath = GetHolidayFilePath(year);
+            var filePath = GetHolidayFilePath(year);
 
             // Check if the file exists
-            if (!File.Exists(filePath))
-            {
-                return new List<HolidayData>();
-            }
+            if (!File.Exists(filePath)) return new List<HolidayData>();
 
-            string jsonContent = File.ReadAllText(filePath);
+            var jsonContent = File.ReadAllText(filePath);
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -150,6 +117,18 @@ namespace NepaliCalendarToolkit.Helpers
         private static string GetHolidayFilePath(int year)
         {
             return Path.Combine(HolidayDirectoryPath, $"{year}.json");
+        }
+
+        // Holiday model that matches the JSON structure
+        public class HolidayData
+        {
+            [JsonPropertyName("month")] public int Month { get; set; }
+
+            [JsonPropertyName("day")] public int Day { get; set; }
+
+            [JsonPropertyName("date")] public string Date { get; set; }
+
+            [JsonPropertyName("name")] public string Name { get; set; }
         }
     }
 }

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Reflection;
+using System.Text.Json;
 
-namespace NepaliCalendarToolkit.Data
+namespace NepaliCalendarToolkit
 {
     public static class YearStart
     {

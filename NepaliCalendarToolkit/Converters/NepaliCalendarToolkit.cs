@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using NepaliCalendarToolkit.Data;
-using NepaliCalendarToolkit.Helpers;
-using NepaliCalendarToolkit.Models;
+using NepaliCalendarToolkit;
 
 public static class NepaliCalendarConverter
 {

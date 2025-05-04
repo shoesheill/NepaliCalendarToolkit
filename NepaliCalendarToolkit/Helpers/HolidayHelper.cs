@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using NepaliCalendarToolkit.Helpers;
-using NepaliCalendarToolkit.Models;
+using NepaliCalendarToolkit;
 
 public static class HolidayHelper
 {

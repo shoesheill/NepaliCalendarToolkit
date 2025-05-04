@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using NepaliCalendarToolkit.Data;
+using NepaliCalendarToolkit;
 
 public class CalendarUtilities
 {
