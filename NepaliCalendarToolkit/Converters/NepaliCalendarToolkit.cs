@@ -151,30 +151,86 @@ public static class NepaliCalendarConverter
         return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
 
-    public static (string StartDate, string EndDate) GetQuarterDateRangeInAd(int yearBs, int quarter)
+    /// <summary>
+    ///     Gets the date range for a specific month in a fiscal year in AD format
+    /// </summary>
+    /// <param name="fiscalYearBs">Fiscal year in BS (e.g. 2080 for fiscal year 2080-81)</param>
+    /// <param name="monthBs">Nepali month (1-12, where 1=Baisakh, 12=Chaitra)</param>
+    /// <returns>Tuple containing start date and end date of the month in AD format (yyyy-MM-dd)</returns>
+    public static (string StartDate, string EndDate) GetMonthDateInAdForFiscalYear(int fiscalYearBs, int monthBs)
+    {
+        if (monthBs < 1 || monthBs > 12)
+            throw new ArgumentException("Month must be between 1 and 12");
+
+        // For fiscal year, months 4-12 (Shrawan to Chaitra) are in the first year,
+        // months 1-3 (Baisakh to Ashar) are in the second year
+        var yearBs = monthBs >= 4 ? fiscalYearBs : fiscalYearBs + 1;
+
+        return GetMonthDateInAd(yearBs, monthBs);
+    }
+
+    /// <summary>
+    ///     Gets the date range for a specific range of months in a fiscal year in AD format
+    /// </summary>
+    /// <param name="fiscalYearBs">Fiscal year in BS (e.g. 2080 for fiscal year 2080-81)</param>
+    /// <param name="startMonth">Starting Nepali month (1-12)</param>
+    /// <param name="endMonth">Ending Nepali month (1-12)</param>
+    /// <returns>Tuple containing start date and end date of the month range in AD format (yyyy-MM-dd)</returns>
+    public static (string StartDate, string EndDate) GetMonthRangeDateInAdForFiscalYear(int fiscalYearBs,
+        int startMonth, int endMonth)
+    {
+        if (startMonth < 1 || startMonth > 12 || endMonth < 1 || endMonth > 12)
+            throw new ArgumentException("Month must be between 1 and 12");
+
+        // When dealing with fiscal years, we need to ensure that months map to appropriate BS years
+        var startYearBs = startMonth >= 4 ? fiscalYearBs : fiscalYearBs + 1;
+        var endYearBs = endMonth >= 4 ? fiscalYearBs : fiscalYearBs + 1;
+
+        // Validate that the range is within a single fiscal year
+        if ((startMonth < 4 && endMonth >= 4) || (startMonth >= 4 && endMonth < 4 && endMonth > 0))
+            throw new ArgumentException("Month range must be within the same fiscal year");
+
+        var startNepaliDate = new NepaliDate(startYearBs, startMonth, 1);
+        var endNepaliDate = new NepaliDate(endYearBs, endMonth, MonthLengths.Lengths[endYearBs][endMonth - 1]);
+        var startDate = ConvertToAd(startNepaliDate);
+        var endDate = ConvertToAd(endNepaliDate);
+        return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
+    }
+    /// <summary>
+    ///     Gets the date range for a quarter in a fiscal year in AD format
+    /// </summary>
+    /// <param name="fiscalYearBs">Fiscal year in BS (e.g. 2080 for fiscal year 2080-81)</param>
+    /// <param name="quarter">Quarter number (1-4)</param>
+    /// <returns>Tuple containing start date and end date of the quarter in AD format (yyyy-MM-dd)</returns>
+    public static (string StartDate, string EndDate) GetQuarterDateRangeInAdForFiscalYear(int fiscalYearBs, int quarter)
     {
         if (quarter < 1 || quarter > 4)
             throw new ArgumentException("Quarter must be between 1 and 4");
 
         int startMonth, endMonth;
+        int yearBs;
 
         switch (quarter)
         {
-            case 1: // Shrawan, Bhadra, Aswin
+            case 1: // First quarter: Shrawan, Bhadra, Aswin (4-6) of fiscal year
                 startMonth = 4;
                 endMonth = 6;
+                yearBs = fiscalYearBs;
                 break;
-            case 2: // Kartik, Mangsir, Push
+            case 2: // Second quarter: Kartik, Mangsir, Push (7-9) of fiscal year
                 startMonth = 7;
                 endMonth = 9;
+                yearBs = fiscalYearBs;
                 break;
-            case 3: // Magh, Falgun, Chaitra
+            case 3: // Third quarter: Magh, Falgun, Chaitra (10-12) of fiscal year
                 startMonth = 10;
                 endMonth = 12;
+                yearBs = fiscalYearBs;
                 break;
-            case 4: // Baisakh, Jest, Ashar
+            case 4: // Fourth quarter: Baisakh, Jest, Ashar (1-3) of next year
                 startMonth = 1;
                 endMonth = 3;
+                yearBs = fiscalYearBs + 1; // Next year for 4th quarter
                 break;
             default:
                 throw new ArgumentException("Invalid quarter");
@@ -186,7 +242,6 @@ public static class NepaliCalendarConverter
         var endDate = ConvertToAd(endNepaliDate);
         return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
     }
-
 
     /// <summary>
     ///     Gets the date range for a Nepali fiscal year in AD format
@@ -208,6 +263,31 @@ public static class NepaliCalendarConverter
         var endNepaliDate =
             new NepaliDate(fiscalYear + 1, 3,
                 MonthLengths.Lengths[fiscalYear + 1][3 - 1]); // Last day of Ashar of next year
+
+        var startDate = ConvertToAd(startNepaliDate);
+        var endDate = ConvertToAd(endNepaliDate);
+
+        return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
+    }
+
+    /// <summary>
+    ///     Gets the date range for a regular Nepali year in AD format
+    /// </summary>
+    /// <param name="year">Nepali year</param>
+    /// <returns>Tuple containing start date and end date of the Nepali year in AD format (yyyy-MM-dd)</returns>
+    public static (string StartDate, string EndDate) GetYearDateRangeInAd(int year)
+    {
+        // Validate input
+        if (!MonthLengths.Lengths.ContainsKey(year))
+        {
+            var supportedYears = string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k));
+            throw new ArgumentException(
+                $"Year {year} is outside the supported range. Supported years are: {supportedYears}");
+        }
+
+        // Regular Nepali year starts from 1st of Baisakh (month 1) and ends on last day of Chaitra (month 12)
+        var startNepaliDate = new NepaliDate(year, 1, 1); // 1st Baisakh
+        var endNepaliDate = new NepaliDate(year, 12, MonthLengths.Lengths[year][12 - 1]); // Last day of Chaitra
 
         var startDate = ConvertToAd(startNepaliDate);
         var endDate = ConvertToAd(endNepaliDate);

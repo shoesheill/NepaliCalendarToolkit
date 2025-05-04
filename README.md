@@ -1,6 +1,7 @@
 # Nepali Calendar Toolkit
 
-This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including Nepali public holidays and weekends from 2065 BS - 2081 BS.
+This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including Nepali public holidays
+and weekends from 2065 BS - 2082 BS.
 
 ## Features
 
