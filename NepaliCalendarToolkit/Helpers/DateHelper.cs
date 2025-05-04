@@ -1,5 +1,5 @@
 using System;
-using NepaliCalendarToolkit.Models;
+using NepaliCalendarToolkit;
 
 public static class DateHelper
 {
