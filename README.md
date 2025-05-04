@@ -25,13 +25,6 @@ dotnet add package NepaliCalendarToolkit
 
 ## Usage
 
-### Initialize Holiday JSON Files (Optional)
-
-```csharp
-// Call this once at application startup if you want to use JSON files
-NepaliCalendarConverter.InitializeHolidayJsonFiles();
-```
-
 ### Get Holidays and Weekends
 
 ```csharp
@@ -43,6 +36,34 @@ var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOr
 
 // Get only weekends for a specific month in a year
 var weekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOrWeekendEnum.Weekends);
+```
+
+### Get Available Date Ranges
+
+```csharp
+// Get the year range for which holiday data is available
+var (minHolidayYear, maxHolidayYear) = NepaliCalendarConverter.GetAvailableHolidayYearsBS();
+// Example output: minHolidayYear: 2065, maxHolidayYear: 2083
+
+// Get the supported Nepali calendar year range
+var (minCalendarYear, maxCalendarYear) = NepaliCalendarConverter.GetAvailableCalendarYearsBS();
+// Example output: minCalendarYear: 2065, maxCalendarYear: 2083
+```
+
+### Configure Weekend Days
+
+```csharp
+// Configure just Saturday as a weekend day
+NepaliCalendarConverter.ConfigureWeekendDays(DayOfWeek.Saturday);
+
+// Configure both Saturday and Sunday as weekend days (default)
+NepaliCalendarConverter.ConfigureWeekendDays(DayOfWeek.Saturday, DayOfWeek.Sunday);
+
+// Configure Friday and Saturday as weekend days
+NepaliCalendarConverter.ConfigureWeekendDays(DayOfWeek.Friday, DayOfWeek.Saturday);
+
+// Get the currently configured weekend days
+DayOfWeek[] weekendDays = NepaliCalendarConverter.GetConfiguredWeekendDays();
 ```
 
 ### Date Conversion
@@ -184,7 +205,27 @@ Response:
 }
 ```
 
-### 6. GetHolidaysAndWeekends
+### 6. GetWeekDateInAd
+
+**Description:** Retrieves the start and end dates in AD for a specific week within a Nepali month.
+
+**Implementation:**
+
+```csharp
+// Get the date range for the 2nd week of Asoj month, 2080 BS
+var weekRange = NepaliCalendarConverter.GetWeekDateInAd(2080, 6, 2);
+```
+
+Response:
+
+```json
+{
+  "StartDate": "2023-09-24",
+  "EndDate": "2023-09-30"
+}
+```
+
+### 7. GetHolidaysAndWeekends
 
 **Description:** Retrieves a list of holidays and weekends for a specified year and optional month.
 
@@ -200,7 +241,7 @@ Response:
 List<HolidayInfo> { ... } // Contains holiday information for the year 2080
 ```
 
-### 7. GetFiscalYearDateRangeInAD
+### 8. GetFiscalYearDateRangeInAD
 
 **Description:** Retrieves the start and end dates in AD for a given Nepali fiscal year.
 
@@ -219,7 +260,7 @@ Response:
 }
 ```
 
-### 8. GetHolidaysAndWeekendsForFiscalYear
+### 9. GetHolidaysAndWeekendsForFiscalYear
 
 **Description:** Retrieves a list of holidays and weekends for a specified fiscal year.
 
