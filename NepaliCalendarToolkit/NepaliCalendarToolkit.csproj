@@ -27,7 +27,7 @@
         <RepositoryUrl>https://github.com/shoesheill/NepaliCalendarToolkit.git</RepositoryUrl>
         <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
         <PackageId>NepaliCalendarToolkit</PackageId>
-        <Version>1.1.4</Version>
+        <Version>1.2.0</Version>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
@@ -39,18 +39,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="System.Text.Json" Version="7.0.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="Data\Holidays\*.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="Data\month-lengths.json"/>
-        <EmbeddedResource Include="Data\year-start.json"/>
+        <PackageReference Include="System.Text.Json" Version="8.0.2"/>
     </ItemGroup>
 
 </Project>

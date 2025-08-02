@@ -1,37 +1,25 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
-using System.Reflection;
 
-public static class MonthLengths
+namespace NepaliCalendarToolkit
 {
-    public static readonly Dictionary<int, int[]> Lengths;
-
-    static MonthLengths()
+    public static class MonthLengths
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourcePath = "NepaliCalendarToolkit.Data.month-lengths.json";
+        public static readonly Dictionary<int, int[]> Lengths;
 
-        using (var stream = assembly.GetManifestResourceStream(resourcePath))
+        static MonthLengths()
         {
-            if (stream != null)
+            // Try to fetch from CDN first
+            var cdnData = CdnDataHelper.FetchJson<Dictionary<int, int[]>>("month-lengths.json");
+
+            if (cdnData != null)
             {
-                // Read from embedded resource
-                using (var reader = new StreamReader(stream))
-                {
-                    var json = reader.ReadToEnd();
-                    Lengths = JsonSerializer.Deserialize<Dictionary<int, int[]>>(json);
-                }
+                Lengths = cdnData;
             }
             else
             {
-                // Fallback to file system if not embedded
-                var filePath = Path.Combine(Path.GetDirectoryName(assembly.Location), "Data", "month-lengths.json");
-                if (File.Exists(filePath))
-                {
-                    var json = File.ReadAllText(filePath);
-                    Lengths = JsonSerializer.Deserialize<Dictionary<int, int[]>>(json);
-                }
+                // Fallback to empty dictionary if CDN fetch fails
+                Lengths = new Dictionary<int, int[]>();
             }
         }
     }
