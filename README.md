@@ -90,9 +90,19 @@ var fiscalYearRange = NepaliCalendarConverter.GetFiscalYearDateRangeInAD(2080);
 var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscalYear(2080);
 ```
 
+## Data Source
+
+The toolkit now fetches data from a CDN hosted at [https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/](https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/). This includes:
+
+- Holiday data from 2065 BS
+- Month lengths data for Nepali calendar calculations
+- Year start dates for Nepali calendar
+
+The data is automatically fetched when needed and cached for performance. If the CDN is unavailable, the toolkit falls back to hardcoded values for basic functionality.
+
 ## Holiday Data Structure
 
-The toolkit now stores holiday data in JSON files (in the Data/Holidays directory) with the following structure:
+The holiday data is stored in JSON format with the following structure:
 
 ```json
 [
