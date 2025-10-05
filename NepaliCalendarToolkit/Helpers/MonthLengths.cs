@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using System.Text.Json;
 
-namespace NepaliCalendarToolkit
+namespace NepaliCalendarToolkit.Helpers
 {
     public static class MonthLengths
     {
@@ -13,14 +12,10 @@ namespace NepaliCalendarToolkit
             var cdnData = CdnDataHelper.FetchJson<Dictionary<int, int[]>>("month-lengths.json");
 
             if (cdnData != null)
-            {
                 Lengths = cdnData;
-            }
             else
-            {
                 // Fallback to empty dictionary if CDN fetch fails
                 Lengths = new Dictionary<int, int[]>();
-            }
         }
     }
 }

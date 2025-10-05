@@ -1,21 +1,24 @@
 using System;
 using System.Runtime.InteropServices;
-using NepaliCalendarToolkit;
+using NepaliCalendarToolkit.Models;
 
-public static class DateHelper
+namespace NepaliCalendarToolkit.Helpers
 {
-    public static string LocaliseDate(DateTime date)
+    public static class DateHelper
     {
-        string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? "Nepal Standard Time"
-            : "Asia/Kathmandu";
-        var kathmanduTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-        var localDate = TimeZoneInfo.ConvertTime(date, kathmanduTimeZone);
-        return localDate.ToString("yyyy-MM-dd");
-    }
+        public static string LocaliseDate(DateTime date)
+        {
+            var timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "Nepal Standard Time"
+                : "Asia/Kathmandu";
+            var kathmanduTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var localDate = TimeZoneInfo.ConvertTime(date, kathmanduTimeZone);
+            return localDate.ToString("yyyy-MM-dd");
+        }
 
-    public static bool IsWeekend(DateTime date)
-    {
-        return WeekendConfiguration.IsWeekend(date.DayOfWeek);
+        public static bool IsWeekend(DateTime date)
+        {
+            return WeekendConfiguration.IsWeekend(date.DayOfWeek);
+        }
     }
 }

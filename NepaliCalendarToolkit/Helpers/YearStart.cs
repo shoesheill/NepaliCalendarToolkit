@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using System.Text.Json;
 
-namespace NepaliCalendarToolkit
+namespace NepaliCalendarToolkit.Helpers
 {
     public static class YearStart
     {
@@ -13,11 +12,8 @@ namespace NepaliCalendarToolkit
             var cdnData = CdnDataHelper.FetchJson<Dictionary<int, string>>("year-start.json");
 
             if (cdnData != null)
-            {
                 Dates = cdnData;
-            }
             else
-            {
                 // Fallback to hardcoded values if CDN fetch fails
                 Dates = new Dictionary<int, string>
                 {
@@ -41,7 +37,6 @@ namespace NepaliCalendarToolkit
                     { 2082, "2025-04-14" },
                     { 2083, "2026-04-14" }
                 };
-            }
         }
     }
 }

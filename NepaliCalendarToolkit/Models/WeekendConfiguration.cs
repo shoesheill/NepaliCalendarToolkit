@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NepaliCalendarToolkit
+namespace NepaliCalendarToolkit.Models
 {
     public static class WeekendConfiguration
     {
@@ -37,7 +37,7 @@ namespace NepaliCalendarToolkit
         /// <returns>Array of configured weekend days</returns>
         public static DayOfWeek[] GetWeekendDays()
         {
-            DayOfWeek[] result = new DayOfWeek[_weekendDays.Count];
+            var result = new DayOfWeek[_weekendDays.Count];
             _weekendDays.CopyTo(result);
             return result;
         }

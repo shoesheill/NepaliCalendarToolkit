@@ -1,6 +1,6 @@
 using System;
 
-namespace NepaliCalendarToolkit
+namespace NepaliCalendarToolkit.Models
 {
     /// <summary>
     ///     Class representing comprehensive information about a date in the Nepali calendar
