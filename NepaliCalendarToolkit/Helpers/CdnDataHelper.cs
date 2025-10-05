@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace NepaliCalendarToolkit
+namespace NepaliCalendarToolkit.Helpers
 {
     public static class CdnDataHelper
     {
         private static readonly HttpClient HttpClient = new HttpClient();
-        private static readonly string BaseUrl = "https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto@master/";
+        private static readonly string BaseUrl = "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/";
 
         static CdnDataHelper()
         {
@@ -20,7 +19,7 @@ namespace NepaliCalendarToolkit
         }
 
         /// <summary>
-        /// Fetches JSON data from the CDN
+        ///     Fetches JSON data from the CDN
         /// </summary>
         /// <typeparam name="T">Type to deserialize the JSON into</typeparam>
         /// <param name="path">Path relative to the CDN base URL</param>
@@ -40,12 +39,12 @@ namespace NepaliCalendarToolkit
             catch (Exception)
             {
                 // Return null if fetching fails
-                return default(T);
+                return default;
             }
         }
 
         /// <summary>
-        /// Fetches JSON data from the CDN synchronously (for backward compatibility)
+        ///     Fetches JSON data from the CDN synchronously (for backward compatibility)
         /// </summary>
         /// <typeparam name="T">Type to deserialize the JSON into</typeparam>
         /// <param name="path">Path relative to the CDN base URL</param>
@@ -65,33 +64,28 @@ namespace NepaliCalendarToolkit
             catch (Exception)
             {
                 // Return null if fetching fails
-                return default(T);
+                return default;
             }
         }
 
         /// <summary>
-        /// Gets a list of available holiday years by checking the CDN
+        ///     Gets a list of available holiday years by checking the CDN
         /// </summary>
         /// <returns>List of available years</returns>
         public static List<int> GetAvailableHolidayYears()
         {
             var years = new List<int>();
-            for (int year = 2065; year <= 2083; year++)
-            {
+            for (var year = 2065; year <= 2083; year++)
                 try
                 {
                     var url = BaseUrl + $"Holidays/{year}.json";
                     var response = HttpClient.GetAsync(url).GetAwaiter().GetResult();
-                    if (response.IsSuccessStatusCode)
-                    {
-                        years.Add(year);
-                    }
+                    if (response.IsSuccessStatusCode) years.Add(year);
                 }
                 catch
                 {
                     // Continue checking other years
                 }
-            }
 
             return years;
         }

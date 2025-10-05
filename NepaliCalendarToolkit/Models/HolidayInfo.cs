@@ -1,18 +1,21 @@
 using System;
 
-public class HolidayInfo
+namespace NepaliCalendarToolkit.Models
 {
-    public HolidayInfo(string dayName, string holidayName, DateTime adDate, string bsDate)
+    public class HolidayInfo
     {
-        DayName = dayName;
-        HolidayName = holidayName;
-        AdDate = adDate;
-        BsDate = bsDate;
-    }
+        public HolidayInfo(string dayName, string holidayName, DateTime adDate, string bsDate)
+        {
+            DayName = dayName;
+            HolidayName = holidayName;
+            AdDate = adDate;
+            BsDate = bsDate;
+        }
 
-    private string DayName { get; }
-    private string HolidayName { get; }
-    private DateTime AdDate { get; }
-    private string BsDate { get; }
-    public DateTime GetAdDate => AdDate;
+        private string DayName { get; }
+        private string HolidayName { get; }
+        private DateTime AdDate { get; }
+        private string BsDate { get; }
+        public DateTime GetAdDate => AdDate;
+    }
 }

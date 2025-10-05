@@ -1,7 +1,7 @@
 # Nepali Calendar Toolkit
 
 This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including Nepali public holidays
-and weekends from 2065 BS - 2082 BS.
+and weekends.
 
 ## Features
 
@@ -30,13 +30,13 @@ dotnet add package NepaliCalendarToolkit
 
 ```csharp
 // Get all holidays and weekends for a specific year
-var holidaysAndWeekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2080);
+var holidaysAndWeekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2082);
 
 // Get only holidays for a specific month in a year
-var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOrWeekendEnum.Holidays);
+var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2082, 1, HolidayOrWeekendEnum.Holidays);
 
 // Get only weekends for a specific month in a year
-var weekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2080, 1, HolidayOrWeekendEnum.Weekends);
+var weekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2082, 1, HolidayOrWeekendEnum.Weekends);
 ```
 
 ### Get Available Date Ranges
@@ -71,11 +71,11 @@ DayOfWeek[] weekendDays = NepaliCalendarConverter.GetConfiguredWeekendDays();
 
 ```csharp
 // Convert from Nepali date to Gregorian date
-var nepaliDate = new NepaliDate(2080, 1, 1);
+var nepaliDate = new NepaliDate(2082, 1, 1);
 var gregorianDate = NepaliCalendarConverter.ConvertToAD(nepaliDate);
 
 // Convert from Gregorian date to Nepali date
-var gregorianDate = new DateTime(2023, 4, 14);
+var gregorianDate = new DateTime(2025, 4, 14);
 var nepaliDate = NepaliCalendarConverter.ConvertToNepali(gregorianDate);
 ```
 
@@ -92,7 +92,7 @@ var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscal
 
 ## Data Source
 
-The toolkit now fetches data from a CDN hosted at [https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/](https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/). This includes:
+The toolkit now fetches data from a CDN hosted at [https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data/](https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/). This includes:
 
 - Holiday data from 2065 BS
 - Month lengths data for Nepali calendar calculations
@@ -112,7 +112,6 @@ The holiday data is stored in JSON format with the following structure:
     "date": "2008-04-23",
     "name": "Loktantra Diwas"
   }
-  // More holidays...
 ]
 ```
 

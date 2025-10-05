@@ -1,22 +1,25 @@
-public class NepaliDate
+namespace NepaliCalendarToolkit.Models
 {
-    public NepaliDate(int year, int month, int day)
+    public class NepaliDate
     {
-        Year = year;
-        Month = month;
-        Day = day;
-    }
+        public NepaliDate(int year, int month, int day)
+        {
+            Year = year;
+            Month = month;
+            Day = day;
+        }
 
-    private int Year { get; }
+        private int Year { get; }
 
-    private int Month { get; }
-    private int Day { get; }
-    public int GetYear => Year;
-    public int GetMonth => Month;
-    public int GetDay => Day;
+        private int Month { get; }
+        private int Day { get; }
+        public int GetYear => Year;
+        public int GetMonth => Month;
+        public int GetDay => Day;
 
-    public override string ToString()
-    {
-        return $"{Year}-{Month:D2}-{Day:D2}";
+        public override string ToString()
+        {
+            return $"{Year}-{Month:D2}-{Day:D2}";
+        }
     }
 }
