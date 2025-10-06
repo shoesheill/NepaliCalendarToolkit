@@ -1,13 +1,12 @@
 # Nepali Calendar Toolkit
 
-This NuGet package provides a comprehensive toolkit for handling Nepali calendar dates, including Nepali public holidays
-and weekends.
+Beyond conversion: This toolkit made easy – configurable weekends, holidays, and date ranges for months, quarters, fiscal years, or any custom period.
 
 ## Features
 
 - Convert between Nepali (Bikram Sambat) and Gregorian (AD) dates
 - Get Nepali public holidays
-- Calculate weekends for Nepali dates
+- Calculate weekends(configurable) for Nepali dates
 - Work with Nepali fiscal years (starts on Shrawan 1st and ends on Ashar end)
 - Get date ranges for Nepali months, quarters, and fiscal years
 - JSON-based holiday data storage
