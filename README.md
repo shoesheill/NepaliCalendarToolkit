@@ -91,7 +91,7 @@ var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscal
 
 ## Data Source
 
-The toolkit now fetches data from a CDN hosted at [https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data/](https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/). This includes:
+The toolkit now fetches data from a CDN hosted at [Nepali-Calendar-Data]([https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/](https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data/)). This includes:
 
 - Holiday data from 2065 BS
 - Month lengths data for Nepali calendar calculations
