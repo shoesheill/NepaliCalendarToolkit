@@ -91,13 +91,51 @@ var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscal
 
 ## Data Source
 
-The toolkit now fetches data from a CDN hosted at [Nepali-Calendar-Data]([https://cdn.jsdelivr.net/gh/shoesheill/shiranai-deto/](https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data/)). This includes:
+The toolkit loads its data from the [Nepali-Calendar-Data](https://github.com/shoesheill/Nepali-Calendar-Data) repository via **jsDelivr CDN**, and stays fully functional offline. This includes:
 
 - Holiday data from 2065 BS
 - Month lengths data for Nepali calendar calculations
 - Year start dates for Nepali calendar
 
-The data is automatically fetched when needed and cached for performance. If the CDN is unavailable, the toolkit falls back to hardcoded values for basic functionality.
+### How data is resolved
+
+Data is resolved in three layers, so it is always fresh when online but never breaks offline:
+
+1. **Live CDN** – the source of truth. Whenever the toolkit is online it fetches the latest data from the
+   configured base URL (defaults to `https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/`).
+   Because this points at the `master` branch, **newly added data is picked up automatically without a
+   library version bump.**
+2. **Persistent disk cache** – every successful fetch is stored under
+   `%LOCALAPPDATA%\NepaliCalendarToolkit\Cache\`. If the device later goes offline, the most recently
+   fetched data is used, so the calendar, holidays, weeks and date ranges all keep working.
+3. **Bundled baseline** – a copy of the data (month-lengths, year-starts and holidays up to 2073 BS)
+   ships inside the NuGet package, so even a first run with no network and no cache still works. To add
+   more years, drop the corresponding `Holidays/{year}.json` files into the `Data/Holidays/` folder before
+   building – they are embedded automatically.
+
+The CDN is consulted at most once every **12 hours** per data file; within that window a cached copy is
+served for speed and offline reliability.
+
+### Configuring the data source
+
+The CDN URL is **not hard-coded**. Set it at deployment time in one of two ways:
+
+```csharp
+// From appsettings (read your config, then call Configure once at startup):
+NepaliCalendarToolkit.Helpers.DataProvider.Configure(
+    baseUrl: "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/",
+    cacheTtlHours: 12);
+```
+
+Or set the `DATA_URL` environment variable, which is read automatically:
+
+```
+set DATA_URL=https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/
+```
+
+If no URL is configured and there is no cache, the embedded baseline is used.
+
+
 
 ## Holiday Data Structure
 

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using NepaliCalendarToolkit.Converters;
 using NepaliCalendarToolkit.Enum;
@@ -23,20 +22,8 @@ namespace NepaliCalendarToolkit.Helpers
             // Get holidays from JSON files if requested
             if (returnType == HolidayOrWeekendEnum.Holidays || returnType == HolidayOrWeekendEnum.Both)
             {
-                // Load holidays from JSON file
+                // Load holidays from the data repository (cached so lookups work offline).
                 var holidayList = HolidayJson.GetHolidays(year);
-
-                // If JSON file doesn't exist, generate it from in-memory data
-                if (!holidayList.Any())
-                    // Generate JSON file for this year
-                    // HolidayJson.GenerateHolidayJsonFiles();
-                    // Try loading the JSON file again
-                    holidayList = HolidayJson.GetHolidays(year);
-
-                // Log a warning if no holiday data is found for the year
-                if (!holidayList.Any())
-                    // You might want to log this situation or handle it as appropriate
-                    Debug.WriteLine($"No holiday data found for year {year}");
 
                 foreach (var holiday in holidayList)
                     if (month == null || holiday.Month == month.Value)

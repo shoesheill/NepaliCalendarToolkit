@@ -1,0 +1,60 @@
+name: Seed Calendar Data
+
+on:
+  schedule:
+    # Roll the calendar data forward once a year. April 1 (00:00 UTC) is the BS
+    # new-year boundary, at which point the preceding BS year's month-lengths
+    # finalize (they depend on the next year's Baisakh 1 being published).
+    - cron: "0 0 1 4 *"
+  # Allow running the seeder any time from the GitHub Actions UI.
+  workflow_dispatch:
+    inputs:
+      max_year:
+        description: "Optional BS year to seed up to (e.g. 2085). Empty uses the current BS year."
+        required: false
+        type: number
+
+permissions:
+  # Needed to write the refreshed Data/*.json + SeedInfo.json back to the branch.
+  contents: write
+
+jobs:
+  seed:
+    name: Seed and commit calendar data
+    runs-on: ubuntu-latest
+    env:
+      SEEDER_PROJECT: tools/NepaliCalendarDataSeeder/NepaliCalendarDataSeeder.csproj
+      # appsettings.json is gitignored, so a clean CI checkout has no ApiUrl config.
+      # The seeder reads this env var first. Source it from the repo variable
+      # DATA_URL (Settings -> Secrets and variables -> Actions -> Variables), with the
+      # default Nepal Patro endpoint as a fallback so the run still works unconfigured.
+      DATAURL: ${{ vars.DATA_URL}}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Run data seeder
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.max_year }}" ]; then
+            ARGS="$ARGS --max-year ${{ github.event.inputs.max_year }}"
+          fi
+          dotnet run -c Release --project "$SEEDER_PROJECT" $ARGS
+
+      - name: Commit and push refreshed data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Data SeedInfo.json
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore(data): refresh seeded calendar data"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

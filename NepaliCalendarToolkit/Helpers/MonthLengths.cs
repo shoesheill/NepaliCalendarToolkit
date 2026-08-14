@@ -8,14 +8,9 @@ namespace NepaliCalendarToolkit.Helpers
 
         static MonthLengths()
         {
-            // Try to fetch from CDN first
-            var cdnData = CdnDataHelper.FetchJson<Dictionary<int, int[]>>("month-lengths.json");
-
-            if (cdnData != null)
-                Lengths = cdnData;
-            else
-                // Fallback to empty dictionary if CDN fetch fails
-                Lengths = new Dictionary<int, int[]>();
+            Lengths = DataProvider.GetData("month-lengths.json", DataProvider.GetEmbedded<Dictionary<int, int[]>>("month-lengths.json"))
+                ?? new Dictionary<int, int[]>();
         }
     }
 }
+
