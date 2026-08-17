@@ -14,7 +14,7 @@ namespace NepaliCalendarDataSeeder
     ///
     ///     Optional arguments:
     ///       --date      yyyy-MM-dd   reference AD date (default: today)
-    ///       --offset    N            seed N BS years beyond the current BS year (default: 0)
+    ///       --offset    N            seed N BS years beyond the current BS year (default: 1)
     ///       --max-year  N            seed up to the given BS year (overrides offset)
     /// </summary>
     public static class Program
@@ -31,7 +31,11 @@ namespace NepaliCalendarDataSeeder
             }
 
             var date = DateTime.Today;
-            var offset = 0;
+            // year-start only needs Baisakh 1 of the target year, so it can legitimately
+            // run ahead of month-lengths/holidays (which need the year after that). Default
+            // to +1 so year-start opportunistically grabs next year's start as soon as the
+            // API publishes it, instead of waiting for the scheduled run after year-end.
+            var offset = 1;
             int? maxYear = null;
 
             for (var i = 0; i < args.Length; i++)
