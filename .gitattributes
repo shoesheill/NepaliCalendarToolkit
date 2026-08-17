@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+
+# Explicit (and stronger) LF normalization for text-heavy repo files,
+# including CI workflows, so backslash line-continuations never break.
+.github/workflows/*.{yml,yaml} text eol=lf
+*.cs text eol=lf
+*.json text eol=lf
+*.csproj text eol=lf
+*.md text eol=lf
+*.xml text eol=lf

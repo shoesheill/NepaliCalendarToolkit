@@ -3,7 +3,7 @@ name: Publish NuGet Package
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v*.*.*'
 
 permissions:
   contents: read
@@ -13,31 +13,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
 
-    - name: Set version from git tag
-      run: |
-        VERSION="${GITHUB_REF#refs/tags/}"
-        VERSION="${VERSION#v}"
-        echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Set version from git tag
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
-    - name: Restore
-      run: dotnet restore
+      - name: Restore
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore -p:Version=$VERSION
+      - name: Build
+        run: dotnet build --configuration Release --no-restore -p:Version=$VERSION
 
-    - name: Pack
-      run: dotnet pack --configuration Release --no-build -p:Version=$VERSION -p:PackageReleaseNotes="Release $VERSION" --output ./nupkg
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build -p:Version=$VERSION -p:PackageReleaseNotes="Release $VERSION" --output ./nupkg
 
-    - name: Publish to NuGet
-      run: dotnet nuget push ./nupkg/NepaliCalendarToolkit.$VERSION.nupkg \
-           --api-key ${{ secrets.NUGET_API_KEY }} \
-           --source https://api.nuget.org/v3/index.json \
-           --skip-duplicate
+      - name: Publish to NuGet
+        # Keep this on ONE line. Backslash line-continuations are fragile under
+        # CRLF and previously caused "Source parameter was not specified."
+        run: dotnet nuget push ./nupkg/NepaliCalendarToolkit.$VERSION.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
