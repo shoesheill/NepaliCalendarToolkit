@@ -12,7 +12,7 @@ on:
       max_year:
         description: "Optional BS year to seed up to (e.g. 2085). Empty uses the current BS year."
         required: false
-        type: number
+        type: string
 
 permissions:
   # contents:write -> push the data branch; pull-requests:write -> open the PR.
