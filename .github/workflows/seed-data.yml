@@ -24,11 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SEEDER_PROJECT: tools/NepaliCalendarDataSeeder/NepaliCalendarDataSeeder.csproj
-      # appsettings.json is gitignored, so a clean CI checkout has no ApiUrl config.
-      # The seeder reads this env var first. Source it from the repo variable
-      # DATA_URL (Settings -> Secrets and variables -> Actions -> Variables), with the
-      # default Nepal Patro endpoint as a fallback so the run still works unconfigured.
-      DATAURL: ${{ vars.DATA_URL}}
+      # appsettings.json is gitignored, so a clean CI checkout has no API_URL config.
+      # The seeder's Program.cs reads the API_URL env var first. Source it from the
+      # API_URL repo variable (Settings -> Secrets and variables -> Actions ->
+      # Variables) so the seeder can reach the Nepal Patro endpoint.
+      API_URL: ${{ vars.API_URL }}
 
     steps:
       - name: Check out repository
