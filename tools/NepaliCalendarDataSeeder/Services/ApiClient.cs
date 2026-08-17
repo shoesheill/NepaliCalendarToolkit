@@ -153,7 +153,11 @@ namespace NepaliCalendarDataSeeder.Services
 
         private static JsonSerializerOptions JsonOptions()
         {
-            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            // The dateConvert / holiday endpoints sometimes return optional numeric
+            // fields as blank or non-numeric strings for unverified future dates.
+            options.Converters.Add(new LenientNullableIntConverter());
+            return options;
         }
     }
 }

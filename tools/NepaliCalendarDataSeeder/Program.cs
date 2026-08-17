@@ -35,7 +35,7 @@ namespace NepaliCalendarDataSeeder
             // run ahead of month-lengths/holidays (which need the year after that). Default
             // to +1 so year-start opportunistically grabs next year's start as soon as the
             // API publishes it, instead of waiting for the scheduled run after year-end.
-            var offset = 1;
+            var offset = 0;
             int? maxYear = null;
 
             for (var i = 0; i < args.Length; i++)

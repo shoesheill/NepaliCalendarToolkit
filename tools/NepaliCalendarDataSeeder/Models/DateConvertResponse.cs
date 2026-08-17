@@ -19,7 +19,6 @@ namespace NepaliCalendarDataSeeder.Models
         [JsonPropertyName("tithi")] public int? Tithi { get; set; }
         [JsonPropertyName("ns_month")] public string NsMonth { get; set; }
         [JsonPropertyName("ns_year")] public int? NsYear { get; set; }
-        [JsonPropertyName("chandrama")] public int? Chandrama { get; set; }
         [JsonPropertyName("is_verified")] public int? IsVerified { get; set; }
         [JsonPropertyName("remarks")] public string Remarks { get; set; }
         [JsonPropertyName("updated_at")] public string UpdatedAt { get; set; }

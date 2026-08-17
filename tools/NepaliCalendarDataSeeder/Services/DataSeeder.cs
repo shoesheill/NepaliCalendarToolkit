@@ -38,15 +38,23 @@ namespace NepaliCalendarDataSeeder.Services
             var currentBsYear = ComputeCurrentBsYear(adDate);
             var targetBsYear = maxYear ?? (currentBsYear + targetOffset);
 
-            // Highest *completely* seeded year. month-lengths is the bottleneck: it can
+            // Highest fully-contiguous seeded year. month-lengths is the bottleneck: it can
             // only be finished once the NEXT year's Baisakh 1 is published, so holiday and
             // year-start files legitimately get ahead of it (e.g. a future year may have
             // holidays but not month-lengths yet). Basing maxExisting on month-lengths alone
             // ensures a later re-run re-seeds those in-between years and fills the gap
             // instead of wrongly reporting "already up to date".
-            var maxExisting = _monthLengths.Keys
-                .DefaultIfEmpty(2064)
-                .Max();
+            //
+            // Use the highest CONTIGUOUS year (starting from the library minimum, 2065)
+            // rather than a bare Max(). A stray out-of-order entry -- e.g. month-lengths
+            // seeded for 2084 while 2083 was skipped because Baisakh 1 of 2084 was not yet
+            // published at the moment 2083 was processed -- would otherwise be treated as
+            // "already fully seeded", push startYear past the target, and both block a
+            // default re-run AND leave the missing 2083 gap permanently unfilled.
+            const int minYear = 2065;
+            var maxExisting = minYear - 1;
+            while (_monthLengths.ContainsKey(maxExisting + 1))
+                maxExisting++;
 
             // The library's minimum supported year is 2065 BS. If no (or only newer)
             // data exists, seed from 2065 so the whole supported range is covered.
