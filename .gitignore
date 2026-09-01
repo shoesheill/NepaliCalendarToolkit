@@ -476,6 +476,8 @@ $RECYCLE.BIN/
 *.msix
 *.msm
 *.msp
+*.Data/
+
 
 # Windows shortcuts
 *.lnk
@@ -485,3 +487,21 @@ $RECYCLE.BIN/
 **/appsettings.json
 **/appsettings.*.json
 !**/appsettings.Template.json
+*./dist/*
+
+##
+## npm package (npm/nepali-calendar-toolkit)
+##
+
+node_modules/
+npm/nepali-calendar-toolkit/dist/
+
+# Calendar data is generated/refreshed by the seed-data workflow (GitHub Actions);
+# it lives on the CDN/repository only and is not tracked locally.
+Data/
+SeedInfo.json
+
+# Baseline data is downloaded at build time by scripts/fetch-baseline-data.mjs
+# (also refreshed in CI before publishing), so keep it out of version control.
+npm/nepali-calendar-toolkit/src/data/
+
