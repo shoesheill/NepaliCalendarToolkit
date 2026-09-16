@@ -8,9 +8,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/copy-data.mjs",
-    "prepublishOnly": "npm run build && node test/smoke.test.mjs",
-    "test": "npm run build && node test/smoke.test.mjs"
+    "build": "node scripts/generate-baseline-index.mjs && tsc -p tsconfig.json && node scripts/copy-data.mjs",
+    "prepublishOnly": "npm run build && node test/smoke.test.mjs && node test/browser.test.mjs",
+    "test": "npm run build && node test/smoke.test.mjs && node test/browser.test.mjs",
+    "test:browser": "node test/browser.test.mjs"
   },
   "keywords": [
     "nepali calendar",

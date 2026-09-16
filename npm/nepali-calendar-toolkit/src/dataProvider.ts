@@ -1,4 +1,5 @@
 import { HolidayData } from "./types";
+import { BASELINE } from "./baselineData";
 
 /**
  * Tiered data provider mirroring the C# DataProvider: live CDN → in-memory cache →
@@ -6,8 +7,17 @@ import { HolidayData } from "./types";
  * by scripts/fetch-baseline-data.mjs from the same Nepali-Calendar-Data repository.
  */
 
+/**
+ * `process` only exists in Node. Reading it unguarded threw ReferenceError the moment a
+ * browser imported this module, taking the whole library down before `configure()` could
+ * ever run — so every web consumer silently lost all conversions.
+ */
+function envDataUrl(): string | undefined {
+  return typeof process !== "undefined" && process.env ? process.env.DATA_URL : undefined;
+}
+
 let baseUrl =
-  process.env.DATA_URL || "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/";
+  envDataUrl() || "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/";
 export let cacheTtlHours = 12;
 
 const memoryCache = new Map<string, { data: unknown; fetchedAt: number }>();
@@ -46,7 +56,7 @@ export async function getData<T>(path: string): Promise<T | undefined> {
     return cached.data as T;
   }
 
-  const baseline = normalizeJson<T>(require(`./data/${path}`));
+  const baseline = normalizeJson<T>(BASELINE[path]);
   let result: T | undefined = baseline;
 
   try {
