@@ -24,6 +24,7 @@ namespace NepaliCalendarDataSeeder.Services
         private Dictionary<int, string> _yearStarts;
         private Dictionary<int, NepaliSambatYear> _nepaliSambat;
         private HashSet<int> _holidayYears;
+        private Dictionary<int, YearMeta> _monthMeta;
 
         public DataSeeder(ApiClient api, string dataDir)
         {
@@ -53,7 +54,10 @@ namespace NepaliCalendarDataSeeder.Services
             // default re-run AND leave the missing 2083 gap permanently unfilled.
             const int minYear = 2065;
             var maxExisting = minYear - 1;
-            while (_monthLengths.ContainsKey(maxExisting + 1))
+            // A PARTIAL year does not count as present: month lengths are now stored as a
+            // prefix, so "the key exists" no longer means "the year is closed". Requiring a
+            // full twelve keeps re-runs coming back to finish it.
+            while (KnownMonthsOf(maxExisting + 1) == 12)
                 maxExisting++;
 
             // The library's minimum supported year is 2065 BS. If no (or only newer)
@@ -65,14 +69,35 @@ namespace NepaliCalendarDataSeeder.Services
             Console.WriteLine($"Seeding range                          : {startYear}..{targetBsYear}");
             Console.WriteLine(new string('-', 60));
 
+            // Years to touch: the new range, plus any earlier year still incomplete or
+            // resting on a prediction. Without the second group a year seeded early — when
+            // the API could only predict it — would stay provisional forever, because the
+            // contiguous-max scan would have moved past it.
+            var refreshable = _monthLengths.Keys
+                .Concat(_yearStarts.Keys)
+                .Where(y => y >= minYear && y < startYear && NeedsRefresh(y))
+                .Distinct()
+                .OrderBy(y => y)
+                .ToList();
+
+            if (refreshable.Count > 0)
+                Console.WriteLine($"Re-checking provisional/partial years   : {string.Join(", ", refreshable)}");
+
+            var targets = refreshable
+                .Concat(Enumerable.Range(startYear, Math.Max(0, targetBsYear - startYear + 1)))
+                .Distinct()
+                .OrderBy(y => y)
+                .ToList();
+
             var records = new List<SeedRecord>();
 
-            for (var year = startYear; year <= targetBsYear; year++)
+            foreach (var year in targets)
             {
                 var record = await SeedYearAsync(year);
                 records.Add(record);
                 Console.WriteLine(
-                    $"Year {year}: month-lengths={(record.MonthLengths ? "Y" : "n")} " +
+                    $"Year {year}: months={record.KnownMonths}/12 " +
+                    $"verified={(record.Verified ? "Y" : "n")} " +
                     $"year-start={(record.YearStart ? "Y" : "n")} holidays={record.HolidayCount} ns={(record.NepaliSambat ? "Y" : "n")}");
             }
 
@@ -86,6 +111,7 @@ namespace NepaliCalendarDataSeeder.Services
                 // during seeding; write them all out once the loop finishes).
                 WriteJson(Path.Combine(_dataDir, "month-lengths.json"), _monthLengths);
                 WriteJson(Path.Combine(_dataDir, "year-start.json"), _yearStarts);
+                WriteJson(Path.Combine(_dataDir, "month-meta.json"), _monthMeta);
                 // WriteJson(Path.Combine(_dataDir, "nepali-sambat.json"), _nepaliSambat);
 
                 WriteSeedInfo(records, adDate, currentBsYear, targetBsYear);
@@ -94,6 +120,54 @@ namespace NepaliCalendarDataSeeder.Services
             }
 
             return records.Count;
+        }
+
+        /// <summary>Leading months currently stored for a year (0 when absent).</summary>
+        private int KnownMonthsOf(int year) =>
+            _monthLengths.TryGetValue(year, out var lengths) ? lengths.Length : 0;
+
+        /// <summary>True when the stored year is complete AND officially confirmed.</summary>
+        private bool IsVerified(int year) =>
+            _monthMeta.TryGetValue(year, out var meta) && meta.Verified && meta.KnownMonths == 12;
+
+        /// <summary>A year still worth re-fetching: incomplete, or resting on a prediction.</summary>
+        private bool NeedsRefresh(int year) => !IsVerified(year);
+
+        /// <summary>
+        ///     Records only that Baisakh 1 of a year is known. Deliberately does NOT touch
+        ///     `verified`: confirming a year's first day says nothing about whether its month
+        ///     lengths are gazetted, and conflating the two marked a fully-predicted year as
+        ///     final.
+        /// </summary>
+        private void UpsertYearStartMeta(int year, bool yearStartVerified)
+        {
+            _monthMeta.TryGetValue(year, out var existing);
+            _monthMeta[year] = new YearMeta
+            {
+                Verified = existing?.Verified ?? false,
+                KnownMonths = existing?.KnownMonths ?? KnownMonthsOf(year),
+                YearStartVerified = (existing?.YearStartVerified ?? false) || yearStartVerified,
+                SeededAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
+            };
+        }
+
+        private void UpsertMeta(int year, bool verified, int knownMonths, bool yearStartVerified)
+        {
+            if (_monthMeta.TryGetValue(year, out var existing))
+            {
+                // Monotonic: a year never loses confirmation or months it already had.
+                verified = existing.Verified || verified;
+                knownMonths = Math.Max(existing.KnownMonths, knownMonths);
+                yearStartVerified = existing.YearStartVerified || yearStartVerified;
+            }
+
+            _monthMeta[year] = new YearMeta
+            {
+                Verified = verified && knownMonths == 12,
+                KnownMonths = knownMonths,
+                YearStartVerified = yearStartVerified,
+                SeededAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
+            };
         }
 
         private async Task<SeedRecord> SeedYearAsync(int year)
@@ -110,6 +184,23 @@ namespace NepaliCalendarDataSeeder.Services
                     return record;
                 }
 
+                var yearStartVerified = start.IsVerified != 0;
+                if (!yearStartVerified)
+                    Console.WriteLine($"Year {year}: warning - Baisakh 1 is_verified=0 (unverified prediction).");
+
+                // Never let a prediction overwrite data that was already confirmed. The API
+                // can serve an unverified value for a year it previously gazetted, and
+                // silently downgrading would make a settled date move again.
+                if (IsVerified(year) && !yearStartVerified)
+                {
+                    Console.WriteLine($"Year {year}: already verified, refusing to overwrite with a prediction.");
+                    record.YearStart = true;
+                    record.MonthLengths = _monthLengths.ContainsKey(year);
+                    record.KnownMonths = _monthLengths.TryGetValue(year, out var kept) ? kept.Length : 0;
+                    record.Verified = true;
+                    return record;
+                }
+
                 _yearStarts[year] = start.Ad;
                 record.YearStart = true;
 
@@ -122,11 +213,15 @@ namespace NepaliCalendarDataSeeder.Services
                 };
                 record.NepaliSambat = true;
 
-                if (start.IsVerified == 0)
-                    Console.WriteLine($"Year {year}: warning - Baisakh 1 is_verified=0 (unverified prediction).");
-
                 // 2) Month lengths = difference between consecutive month starts.
-                var lengths = new int[12];
+                //
+                // Kept as a PREFIX rather than all-or-nothing. Months publish one at a time,
+                // and the twelfth needs the FOLLOWING year's Baisakh 1 — so demanding all
+                // twelve threw away months that were already known. A fiscal year only needs
+                // the first three months of its closing year, so a prefix of 3 is enough to
+                // resolve it roughly nine months earlier than before.
+                var lengths = new List<int>(12);
+                var verified = yearStartVerified;
                 var previous = ParseAd(start.Ad);
                 for (var m = 1; m <= 12; m++)
                 {
@@ -136,17 +231,42 @@ namespace NepaliCalendarDataSeeder.Services
 
                     if (next == null || string.IsNullOrWhiteSpace(next.Ad))
                     {
-                        Console.WriteLine($"Year {year}: month {m} next-start unavailable, month-lengths skipped.");
-                        record.MonthLengths = false;
-                        return record;
+                        Console.WriteLine(
+                            $"Year {year}: month {m} next-start unavailable, keeping {lengths.Count} known month(s).");
+                        break;
                     }
 
+                    if (next.IsVerified == 0) verified = false;
+
                     var nextAd = ParseAd(next.Ad);
-                    lengths[m - 1] = (int)(nextAd - previous).TotalDays;
+                    lengths.Add((int)(nextAd - previous).TotalDays);
                     previous = nextAd;
+
+                    // The month-12 boundary IS Baisakh 1 of the next year. It was already
+                    // being fetched and thrown away, so the next year's start came for free
+                    // and was simply never written.
+                    if (m == 12)
+                    {
+                        _yearStarts[year + 1] = next.Ad;
+                        _nepaliSambat[year + 1] = new NepaliSambatYear
+                        {
+                            NsYear = next.NsYear ?? 0,
+                            NsMonth = next.NsMonth,
+                            AdStart = next.Ad
+                        };
+                        UpsertYearStartMeta(year + 1, next.IsVerified != 0);
+                    }
                 }
-                _monthLengths[year] = lengths;
-                record.MonthLengths = true;
+
+                // Only widen. A run that resolved fewer months than are already stored (a
+                // transient API gap) must not shrink the file.
+                if (lengths.Count > 0 && lengths.Count >= KnownMonthsOf(year))
+                    _monthLengths[year] = lengths.ToArray();
+
+                record.KnownMonths = KnownMonthsOf(year);
+                record.MonthLengths = record.KnownMonths == 12;
+                record.Verified = verified;
+                UpsertMeta(year, verified, record.KnownMonths, yearStartVerified);
 
                 // 3) Government holidays.
                 var holidays = await _api.GetGovernmentHolidaysAsync(year);
@@ -233,6 +353,7 @@ namespace NepaliCalendarDataSeeder.Services
         {
             _monthLengths = ReadJson<Dictionary<int, int[]>>("month-lengths.json") ?? new Dictionary<int, int[]>();
             _yearStarts = ReadJson<Dictionary<int, string>>("year-start.json") ?? new Dictionary<int, string>();
+            _monthMeta = ReadJson<Dictionary<int, YearMeta>>("month-meta.json") ?? new Dictionary<int, YearMeta>();
             _nepaliSambat = ReadJson<Dictionary<int, NepaliSambatYear>>("nepali-sambat.json") ?? new Dictionary<int, NepaliSambatYear>();
 
             _holidayYears = new HashSet<int>();

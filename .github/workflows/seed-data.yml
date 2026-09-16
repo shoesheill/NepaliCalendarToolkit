@@ -2,10 +2,16 @@ name: Seed Calendar Data
 
 on:
   schedule:
-    # Roll the calendar data forward once a year. April 1 (00:00 UTC) is the BS
-    # new-year boundary, at which point the preceding BS year's month-lengths
-    # finalize (they depend on the next year's Baisakh 1 being published).
-    - cron: "0 0 1 4 *"
+    # Daily. Nepal Patro publishes predictions ahead of the official gazette and then
+    # confirms them, and holidays for a year land separately again — so the data changes
+    # on no fixed schedule, and an annual run left every mid-year publication sitting
+    # unused until the following April.
+    #
+    # A no-op day is cheap: the seeder skips years already complete AND verified, so once
+    # everything is settled a run is a handful of API calls, and the commit step opens no
+    # PR when nothing changed. What it does buy is that a prediction gets upgraded to
+    # gazetted data within a day of publication instead of within a year.
+    - cron: "0 0 * * *"
   # Allow running the seeder any time from the GitHub Actions UI.
   workflow_dispatch:
     inputs:
@@ -56,7 +62,11 @@ jobs:
       - name: Commit refreshed data
         id: commit
         run: |
-          git add Data SeedInfo.json
+          # -f because .gitignore lists Data/. The existing files commit anyway (tracked
+          # files override ignore rules), but a NEW one is skipped silently — which would
+          # have swallowed month-meta.json, and equally Holidays/{year}.json the first time
+          # a new year appears.
+          git add -f Data SeedInfo.json
           if git diff --cached --quiet; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
             echo "No data changes to commit."

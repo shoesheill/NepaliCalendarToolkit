@@ -83,12 +83,21 @@ namespace NepaliCalendarToolkit.Utilities
             return (int)Math.Round(daysPassed + 1);
         }
 
+        /// <summary>
+        ///     Leading months known for a year. Month lengths are stored as a PREFIX: months
+        ///     publish one at a time and the twelfth needs the FOLLOWING year's Baisakh 1, so
+        ///     a year in progress legitimately holds only its first few.
+        /// </summary>
+        internal static int KnownMonths(int year) =>
+            MonthLengths.Lengths.TryGetValue(year, out var lengths) ? lengths.Length : 0;
+
+        /// <summary>Is this specific month resolvable? A partial year answers only up to its prefix.</summary>
+        internal static bool IsSupportedMonth(int year, int month) =>
+            month >= 1 && month <= KnownMonths(year);
+
         internal static bool IsValidNepaliDate(NepaliDate date)
         {
-            if (!MonthLengths.Lengths.ContainsKey(date.GetYear))
-                return false;
-
-            if (date.GetMonth < 1 || date.GetMonth > 12)
+            if (!IsSupportedMonth(date.GetYear, date.GetMonth))
                 return false;
 
             if (date.GetDay < 1 || date.GetDay > MonthLengths.Lengths[date.GetYear][date.GetMonth - 1])
@@ -99,13 +108,7 @@ namespace NepaliCalendarToolkit.Utilities
 
         internal static bool IsValidNepaliMonth(int year, int month)
         {
-            if (!MonthLengths.Lengths.ContainsKey(year))
-                return false;
-
-            if (month < 1 || month > 12)
-                return false;
-
-            return true;
+            return IsSupportedMonth(year, month);
         }
     }
 }

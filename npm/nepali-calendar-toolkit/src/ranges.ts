@@ -1,4 +1,4 @@
-import { isSupportedYear, monthLengths } from "./calendarData";
+import { isSupportedMonth, isSupportedYear, monthLengths } from "./calendarData";
 import { convertToAd, isValidNepaliMonth, supportedYearsError } from "./converter";
 import { DateRange, NepaliDate } from "./types";
 
@@ -83,13 +83,18 @@ export async function getQuarterDateRangeInAd(yearBs: number, quarter: number, i
 
 export async function getYearDateRangeInAd(yearBs: number, isFiscalYear = false): Promise<DateRange> {
   if (isFiscalYear) {
-    if (!isSupportedYear(yearBs) || !isSupportedYear(yearBs + 1)) throw supportedYearsError();
+    // Shrawan (4) of yearBs through Ashadh (3) of yearBs + 1. Only the first THREE months
+    // of the closing year are needed, not the whole of it — which is what lets the current
+    // fiscal year resolve months before its closing year is fully published.
+    if (!isSupportedMonth(yearBs, 4) || !isSupportedMonth(yearBs + 1, 3)) {
+      throw supportedYearsError();
+    }
     const startDate = await convertToAd(new NepaliDate(yearBs, 4, 1));
     const endDate = await convertToAd(new NepaliDate(yearBs + 1, 3, monthLengths[yearBs + 1][2]));
     return { startDate, endDate };
   }
 
-  if (!isSupportedYear(yearBs)) throw supportedYearsError();
+  if (!isSupportedMonth(yearBs, 12)) throw supportedYearsError();
   const startDate = await convertToAd(new NepaliDate(yearBs, 1, 1));
   const endDate = await convertToAd(new NepaliDate(yearBs, 12, monthLengths[yearBs][11]));
   return { startDate, endDate };

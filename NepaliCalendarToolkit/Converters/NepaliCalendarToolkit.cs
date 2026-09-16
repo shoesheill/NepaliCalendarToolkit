@@ -293,8 +293,12 @@ namespace NepaliCalendarToolkit.Converters
         {
             if (isFiscalYear)
             {
-                // Validate input for fiscal year
-                if (!MonthLengths.Lengths.ContainsKey(yearBs) || !MonthLengths.Lengths.ContainsKey(yearBs + 1))
+                // A fiscal year spans Shrawan (4) of yearBs to Ashadh (3) of yearBs + 1, so
+                // it needs only the FIRST THREE months of the closing year, not all twelve.
+                // Requiring the whole closing year is what made the CURRENT fiscal year
+                // unavailable for most of its own duration.
+                if (!CalendarUtilities.IsSupportedMonth(yearBs, 4) ||
+                    !CalendarUtilities.IsSupportedMonth(yearBs + 1, 3))
                 {
                     var supportedYears = string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k));
                     throw new ArgumentException(
@@ -404,6 +408,34 @@ namespace NepaliCalendarToolkit.Converters
 
             return (years.Min(), years.Max());
         }
+
+        /// <summary>
+        ///     Leading months known for a BS year (12 = complete, 0 = absent).
+        /// </summary>
+        public static int GetKnownMonthsBs(int year) => CalendarUtilities.KnownMonths(year);
+
+        /// <summary>
+        ///     True when a year rests on an unverified prediction or is still incomplete.
+        ///
+        ///     Nepal Patro publishes predictions ahead of the official gazette, and a revision
+        ///     can move a date. Callers that merely display a period can ignore this; anything
+        ///     that has to be right — a tax filing, say — should refuse provisional data.
+        /// </summary>
+        public static bool IsProvisionalBs(int year)
+        {
+            if (!MonthMeta.Meta.TryGetValue(year, out var meta))
+            {
+                // No metadata at all means data predating month-meta.json, which was only
+                // ever written for confirmed, complete years.
+                return CalendarUtilities.KnownMonths(year) != 12;
+            }
+
+            return !meta.Verified || meta.KnownMonths != 12;
+        }
+
+        /// <summary>Full provenance for a year, or null when nothing is stored.</summary>
+        public static YearMeta GetYearInfoBs(int year) =>
+            MonthMeta.Meta.TryGetValue(year, out var meta) ? meta : null;
 
         /// <summary>
         ///     Gets comprehensive date information for the current date

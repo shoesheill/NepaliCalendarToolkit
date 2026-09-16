@@ -1,4 +1,4 @@
-import { isSupportedYear, monthLengths, supportedYears, yearStart } from "./calendarData";
+import { isSupportedMonth, isSupportedYear, knownMonths, monthLengths, supportedYears, yearStart } from "./calendarData";
 import { addDays, formatDateString, parseDateString, toKathmanduDateString } from "./dateHelper";
 import { NepaliDate } from "./types";
 
@@ -45,21 +45,24 @@ function getMonthAndDate(year: number, localDate: string): { month: number; day:
 
   let daysPassed = getDaysPassed(year, localDate);
   const lengths = monthLengths[year];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < lengths.length; i++) {
     if (daysPassed <= lengths[i]) return { month: i + 1, day: daysPassed };
     daysPassed -= lengths[i];
   }
-  throw new Error("Date falls outside the supported year data.");
+  // Falls beyond the months seeded so far — a real answer exists, it just is not
+  // published yet, which is a different thing from the year being unsupported.
+  throw new Error(
+    `Date falls beyond the seeded months of BS ${year} (${lengths.length}/12 known).`,
+  );
 }
 
 export function isValidNepaliDate(date: NepaliDate): boolean {
-  if (!isSupportedYear(date.year)) return false;
-  if (date.month < 1 || date.month > 12) return false;
+  if (!isSupportedMonth(date.year, date.month)) return false;
   return date.day >= 1 && date.day <= monthLengths[date.year][date.month - 1];
 }
 
 export function isValidNepaliMonth(year: number, month: number): boolean {
-  return isSupportedYear(year) && month >= 1 && month <= 12;
+  return isSupportedMonth(year, month);
 }
 
 /** Converts an AD Date to a Nepali (BS) date. */
@@ -80,6 +83,8 @@ export async function convertToNepaliFromString(ad: string): Promise<NepaliDate>
 /** Converts a Nepali (BS) date to an AD date (as a yyyy-MM-dd string). */
 export async function convertToAd(nepaliDate: NepaliDate): Promise<string> {
   if (!isSupportedYear(nepaliDate.year)) throw supportedYearsError();
+  // Only the months BEFORE the target need to be known — asking for Baisakh of a year
+  // whose Kartik is unpublished is perfectly answerable.
   if (!isValidNepaliDate(nepaliDate)) throw new Error("Invalid Nepali date");
 
   let date = parseDateString(yearStart[nepaliDate.year]);

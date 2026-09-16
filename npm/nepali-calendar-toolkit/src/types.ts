@@ -14,6 +14,23 @@ export class NepaliDate {
   }
 }
 
+/**
+ * Provenance for one BS year (Data/month-meta.json).
+ *
+ * A year can be present without being final: Nepal Patro publishes predictions ahead of the
+ * official gazette, and month lengths arrive a month at a time.
+ */
+export interface YearMeta {
+  /** False when any conversion behind the year came back unverified. */
+  verified: boolean;
+  /** Leading months known (12 = complete). */
+  knownMonths: number;
+  /** Whether Baisakh 1 of the year is itself verified. */
+  yearStartVerified: boolean;
+  /** UTC timestamp of the run that last wrote the year. */
+  seededAt?: string;
+}
+
 export interface HolidayData {
   month: number;
   day: number;

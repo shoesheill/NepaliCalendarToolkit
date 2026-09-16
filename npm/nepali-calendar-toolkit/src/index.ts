@@ -4,7 +4,16 @@ export * from "./ranges";
 export * from "./holidays";
 export * from "./currentDate";
 export { configure } from "./dataProvider";
-export { loadCalendarData, supportedYears, isSupportedYear } from "./calendarData";
+export {
+  loadCalendarData,
+  supportedYears,
+  isSupportedYear,
+  isSupportedMonth,
+  knownMonths,
+  completeYears,
+  isProvisional,
+  getYearInfo,
+} from "./calendarData";
 export { isWeekend } from "./weekend";
 
 import { loadCalendarData } from "./calendarData";
