@@ -69,13 +69,20 @@ namespace NepaliCalendarDataSeeder.Services
             Console.WriteLine($"Seeding range                          : {startYear}..{targetBsYear}");
             Console.WriteLine(new string('-', 60));
 
-            // Years to touch: the new range, plus any earlier year still incomplete or
-            // resting on a prediction. Without the second group a year seeded early — when
-            // the API could only predict it — would stay provisional forever, because the
-            // contiguous-max scan would have moved past it.
+            // Years to touch: the new range, plus any year still incomplete or resting on a
+            // prediction. Without the second group a year seeded early — when the API could
+            // only predict it — would stay provisional forever, because the contiguous-max
+            // scan would have moved past it.
+            //
+            // Bounded below by the current BS year. A year that has already ended is history
+            // and will not be revised by a nightly job; if its data ever needs correcting
+            // that is a deliberate --max-year run. Without this the oldest year re-fetched
+            // every single night forever: the API reports BS 2065 (AD 2008) as
+            // is_verified = 0, presumably predating its gazette records, so it can never
+            // flip to verified and the retry could never succeed.
             var refreshable = _monthLengths.Keys
                 .Concat(_yearStarts.Keys)
-                .Where(y => y >= minYear && y < startYear && NeedsRefresh(y))
+                .Where(y => y >= minYear && y >= (currentBsYear - 1) && y < startYear && NeedsRefresh(y))
                 .Distinct()
                 .OrderBy(y => y)
                 .ToList();
