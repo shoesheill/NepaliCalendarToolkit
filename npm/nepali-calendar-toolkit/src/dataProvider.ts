@@ -4,7 +4,7 @@ import { BASELINE } from "./baselineData";
 /**
  * Tiered data provider mirroring the C# DataProvider: live CDN → in-memory cache →
  * bundled baseline snapshot. The baseline JSON files are downloaded at build time
- * by scripts/fetch-baseline-data.mjs from the same Nepali-Calendar-Data repository.
+ * by scripts/fetch-baseline-data.mjs from the same NepaliCalendarToolkit repository.
  */
 
 /**
@@ -17,7 +17,7 @@ function envDataUrl(): string | undefined {
 }
 
 let baseUrl =
-  envDataUrl() || "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/";
+  envDataUrl() || "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/";
 export let cacheTtlHours = 12;
 
 const memoryCache = new Map<string, { data: unknown; fetchedAt: number }>();

@@ -1,4 +1,4 @@
-// Downloads a baseline snapshot of the calendar data from the Nepali-Calendar-Data
+// Downloads a baseline snapshot of the calendar data from the NepaliCalendarToolkit
 // repository into src/data so the package always works offline (mirrors the C#
 // package's embedded resources). Run automatically before publishing.
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const BASE_URL =
-  process.env.DATA_URL || "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/";
+  process.env.DATA_URL || "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/";
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data");
 
 async function download(path) {

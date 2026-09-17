@@ -91,7 +91,7 @@ var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscal
 
 ## Data Source
 
-The toolkit loads its data from the [Nepali-Calendar-Data](https://github.com/shoesheill/Nepali-Calendar-Data) repository via **jsDelivr CDN**, and stays fully functional offline. This includes:
+The toolkit loads its data from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repository via **jsDelivr CDN**, and stays fully functional offline. This includes:
 
 - Holiday data from 2065 BS
 - Month lengths data for Nepali calendar calculations
@@ -102,7 +102,7 @@ The toolkit loads its data from the [Nepali-Calendar-Data](https://github.com/sh
 Data is resolved in three layers, so it is always fresh when online but never breaks offline:
 
 1. **Live CDN** – the source of truth. Whenever the toolkit is online it fetches the latest data from the
-   configured base URL (defaults to `https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/`).
+   configured base URL (defaults to `https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/`).
    Because this points at the `master` branch, **newly added data is picked up automatically without a
    library version bump.**
 2. **Persistent disk cache** – every successful fetch is stored under
@@ -123,14 +123,14 @@ The CDN URL is **not hard-coded**. Set it at deployment time in one of two ways:
 ```csharp
 // From appsettings (read your config, then call Configure once at startup):
 NepaliCalendarToolkit.Helpers.DataProvider.Configure(
-    baseUrl: "https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/",
+    baseUrl: "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/",
     cacheTtlHours: 12);
 ```
 
 Or set the `DATA_URL` environment variable, which is read automatically:
 
 ```
-set DATA_URL=https://cdn.jsdelivr.net/gh/shoesheill/Nepali-Calendar-Data@master/
+set DATA_URL=https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/
 ```
 
 If no URL is configured and there is no cache, the embedded baseline is used.
