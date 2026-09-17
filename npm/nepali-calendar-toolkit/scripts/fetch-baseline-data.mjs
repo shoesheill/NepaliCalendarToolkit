@@ -7,11 +7,19 @@ import { fileURLToPath } from "node:url";
 
 const BASE_URL =
   process.env.DATA_URL || "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/";
+const DATA_ROOT = "Data/";
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data");
 
-async function download(path) {
-  const res = await fetch(new URL(path, BASE_URL));
-  if (!res.ok) throw new Error(`Failed to fetch ${path}: HTTP ${res.status}`);
+async function download(path, { optional = false } = {}) {
+  const sourcePath = `${DATA_ROOT}${path}`;
+  const res = await fetch(new URL(sourcePath, BASE_URL));
+  if (!res.ok) {
+    if (optional && res.status === 404) {
+      console.warn(`skipped ${path} (not published)`);
+      return undefined;
+    }
+    throw new Error(`Failed to fetch ${sourcePath}: HTTP ${res.status}`);
+  }
   // Data repo files may contain `//` comments; strip them for strict JSON.
   const clean = (t) => t.replace(/\/\/.*$/gm, "").replace(/,\s*([}\]])/gm, "$1");
   const json = JSON.parse(clean(await res.text()));
@@ -19,14 +27,13 @@ async function download(path) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify(json));
   console.log(`saved ${path} (${Buffer.byteLength(JSON.stringify(json))} bytes)`);
+  return json;
 }
 
 const years = process.argv[2] ? process.argv[2].split(",").map(Number) : [];
-await download("month-lengths.json");
+const monthLengths = await download("month-lengths.json");
 await download("year-start.json");
 
-const mlText = await (await fetch(new URL("month-lengths.json", BASE_URL))).text();
-const monthLengths = JSON.parse(mlText.replace(/\/\/.*$/gm, "").replace(/,\s*([}\]])/gm, "$1"));
 const allYears = Object.keys(monthLengths).map(Number).sort((a, b) => a - b);
 const yearsToFetch = years.length ? years : allYears.filter((y) => y >= allYears[allYears.length - 1] - 15);
-for (const year of yearsToFetch) await download(`Holidays/${year}.json`);
+for (const year of yearsToFetch) await download(`Holidays/${year}.json`, { optional: true });

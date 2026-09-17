@@ -18,6 +18,7 @@ function envDataUrl(): string | undefined {
 
 let baseUrl =
   envDataUrl() || "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/";
+const DATA_ROOT = "Data/";
 export let cacheTtlHours = 12;
 
 const memoryCache = new Map<string, { data: unknown; fetchedAt: number }>();
@@ -37,7 +38,7 @@ function stripJsonComments(text: string): string {
 }
 
 async function fetchJson(path: string): Promise<unknown | undefined> {
-  const res = await fetch(new URL(path, baseUrl), {
+  const res = await fetch(new URL(`${DATA_ROOT}${path}`, baseUrl), {
     headers: { "User-Agent": "nepali-calendar-toolkit/1.0" },
     signal: AbortSignal.timeout(15_000),
   });

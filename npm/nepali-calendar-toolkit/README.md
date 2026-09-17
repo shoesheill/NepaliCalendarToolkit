@@ -38,8 +38,8 @@ const info = await getCurrentDateInfo(true); // includes monthName, quarter, fis
 
 ## Data strategy (mirrors the C# package)
 
-1. **Bundled baseline** — a snapshot of `month-lengths.json`, `year-start.json` and `Holidays/*.json` copied into `src/data` at build time by `scripts/fetch-baseline-data.mjs` (from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repo). Guarantees the package always works offline.
-2. **Live CDN** — at runtime the same repository is fetched (default `https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/`, overridable via the `DATA_URL` env var or `configure(url, ttlHours)`) and merged over the baseline, so newly seeded years appear without a package release.
+1. **Bundled baseline** — a snapshot of `Data/month-lengths.json`, `Data/year-start.json` and `Data/Holidays/*.json` copied into `src/data` at build time by `scripts/fetch-baseline-data.mjs` (from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repo). Guarantees the package always works offline.
+2. **Live CDN** — at runtime the same repository's `Data/` directory is fetched (default `https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/`, overridable via the `DATA_URL` env var or `configure(url, ttlHours)`) and merged over the baseline, so newly seeded years appear without a package release.
 
 Timezone handling uses `Intl` (`Asia/Kathmandu`) — no OS timezone database dependency, works in Node and browsers.
 
