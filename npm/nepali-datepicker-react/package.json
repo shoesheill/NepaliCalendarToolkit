@@ -1,0 +1,59 @@
+{
+  "name": "nepali-datepicker-react",
+  "version": "0.1.0",
+  "description": "Framework-styled React datepicker for nepali-calendar-toolkit — BS month grid popup with holidays, weekends, min/max bounds. Zero styling-framework lock-in (plain CSS + opt-in className hooks).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-styles.mjs",
+    "prepublishOnly": "npm run build && npm run test:node && npm run test:dom",
+    "test": "npm run build && npm run test:node && npm run test:dom",
+    "test:node": "node test/smoke.test.mjs",
+    "test:dom": "node test/render.test.mjs"
+  },
+  "keywords": [
+    "nepali calendar",
+    "nepali datepicker",
+    "bikram sambat",
+    "react",
+    "date picker",
+    "nepali date"
+  ],
+  "author": "Sushil Shrestha",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shoesheill/NepaliCalendarToolkit.git",
+    "directory": "npm/nepali-datepicker-react"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "nepali-calendar-toolkit": "^1.6.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "@types/react": "^18.2.56",
+    "jsdom": "^25.0.1",
+    "nepali-calendar-toolkit": "file:../nepali-calendar-toolkit",
+    "react": "^18.2.0",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.0"
+  }
+}

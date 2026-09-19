@@ -58,10 +58,10 @@ export const BS_WEEKDAY_LABELS: BsWeekdayLabels = {
 /** Devanagari digits ०–९ for the nepaliDigits switch. */
 export const NEPALI_DIGITS = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
 
-/** Renders 1–31 with Devanagari digits when enabled. */
-export function toPickerDigits(day: number, nepaliDigits: boolean): string {
-  if (!nepaliDigits) return String(day);
-  return String(day)
+/** Renders 1–31 (or any number/key) with Devanagari digits when enabled. */
+export function toPickerDigits(value: number | string, nepaliDigits: boolean): string {
+  if (!nepaliDigits) return String(value);
+  return String(value)
     .split("")
     .map((ch) => NEPALI_DIGITS[Number(ch)] ?? ch)
     .join("");

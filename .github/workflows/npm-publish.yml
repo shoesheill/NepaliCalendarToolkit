@@ -50,3 +50,49 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Publishes the optional React popup. It compiles against the toolkit's source of
+  # truth (a `file:` dev dependency), so the toolkit is built here first and the
+  # tag version is applied to both packages.
+  publish-datepicker:
+    needs: publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: npm/nepali-datepicker-react
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Set version from git tag
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          (cd ../nepali-calendar-toolkit && npm version "$VERSION" --no-git-tag-version --allow-same-version)
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Build nepali-calendar-toolkit (file: dependency)
+        working-directory: npm/nepali-calendar-toolkit
+        run: |
+          npm ci
+          node scripts/fetch-baseline-data.mjs
+          npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and run smoke tests
+        run: npm test
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

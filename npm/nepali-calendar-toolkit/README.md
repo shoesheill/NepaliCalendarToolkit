@@ -36,6 +36,25 @@ const holidays = await getHolidaysAndWeekends(2081, undefined, "holidays");
 const info = await getCurrentDateInfo(true); // includes monthName, quarter, fiscalYear, isWeekend...
 ```
 
+## Datepicker primitives
+
+The BS month-grid view model used by datepickers is part of the public API, so a
+host can render a calendar in any framework (or plain DOM) without re-deriving
+weekdays, holidays or month lengths:
+
+```js
+import { buildMonthGrid, daysInBsMonth, monthNames, formatBsLong, sameBsDay } from "nepali-calendar-toolkit";
+
+await ready;
+const grid = await buildMonthGrid(2083, 6, "2083-06-04"); // year, month, todayKey?
+grid.leadingBlanks;        // 0=Sun..6=Sat padding before day 1
+grid.cells[0];             // { day, bsKey, adDate, weekday, weekend, holidayName?, today }
+```
+
+An optional React popup built on top of it ships separately as
+[`nepali-datepicker-react`](https://www.npmjs.com/package/nepali-datepicker-react)
+(`npm install nepali-datepicker-react`).
+
 ## Data strategy (mirrors the C# package)
 
 1. **Bundled baseline** — a snapshot of `Data/month-lengths.json`, `Data/year-start.json` and `Data/Holidays/*.json` copied into `src/data` at build time by `scripts/fetch-baseline-data.mjs` (from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repo). Guarantees the package always works offline.
