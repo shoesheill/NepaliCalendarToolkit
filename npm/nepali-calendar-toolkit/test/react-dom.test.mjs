@@ -22,8 +22,8 @@ Object.defineProperty(globalThis, "navigator", {
 // Globals must exist before React (and its DOM renderer) are evaluated.
 const React = (await import("react")).default;
 const { createRoot } = await import("react-dom/client");
-const { BsDatePickerPopup } = await import("../dist/index.js");
-const { ready } = await import("nepali-calendar-toolkit");
+const { BsDatePickerPopup } = await import("../dist/react/index.js");
+const { ready } = await import("../dist/index.js");
 await ready;
 
 const waitUntil = async (cond, label) => {
@@ -60,7 +60,7 @@ assert.strictEqual(yearSel.value, "2082");
 
 // ── Picking a month in the dropdown swaps the grid ────────────────────────────
 await waitUntil(() => document.querySelectorAll(".nct-day").length > 0, "the day grid");
-const { convertToAd } = await import("nepali-calendar-toolkit");
+const { convertToAd } = await import("../dist/index.js");
 const adOf = (year, month, day) => convertToAd({ year, month, day });
 // Each day cell carries its resolved AD date in `title`, so day 1 of the view
 // month is a reliable marker for WHICH month is rendered. It is null while the
@@ -188,4 +188,4 @@ assert.strictEqual(
 );
 root4.unmount();
 
-console.log("\nnepali-datepicker-react dom smoke passed");
+console.log("\nnepali-calendar-toolkit /react dom smoke passed");

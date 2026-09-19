@@ -1,8 +1,8 @@
 // Smoke: controller opens on a known month, builds a grid, switches months via
-// the header dropdown, and commits a pick.
+// the header dropdown, and commits a pick. Exercises the `/react` subpath entry.
 import assert from "node:assert";
-import { createBsPickerController, normalizeBsKey } from "../dist/index.js";
-import { ready } from "nepali-calendar-toolkit";
+import { createBsPickerController, normalizeBsKey } from "../dist/react/index.js";
+import { ready } from "../dist/index.js";
 
 await ready;
 assert.strictEqual(normalizeBsKey("2082-4-5"), "2082-04-05");
@@ -53,4 +53,4 @@ assert.ok(picked, "expected onChange after pickDay");
 assert.strictEqual(picked.bs, "2082-04-16");
 assert.ok(picked.ad && /^\d{4}-\d{2}-\d{2}$/.test(picked.ad), `bad AD: ${picked.ad}`);
 ctrl.dispose();
-console.log("\nnepali-datepicker-react smoke passed");
+console.log("\nnepali-calendar-toolkit /react smoke passed");

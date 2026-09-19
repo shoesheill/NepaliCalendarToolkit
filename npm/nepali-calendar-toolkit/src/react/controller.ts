@@ -14,7 +14,7 @@ import {
   sameBsDay,
   supportedYears,
   type BsMonthGrid,
-} from "nepali-calendar-toolkit";
+} from "../index";
 import {
   BS_WEEKDAY_LABELS,
   normalizeBsKey,

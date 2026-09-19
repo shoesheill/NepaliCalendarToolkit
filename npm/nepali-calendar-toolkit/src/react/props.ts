@@ -5,9 +5,9 @@
 // framework package can import the same contract without a React dependency.
 
 // The BS vocabulary itself — date string, locale, weekday labels, Devanagari
-// digits, key normalisation — is owned by `nepali-calendar-toolkit` and
-// re-exported here, so a host app and every framework wrapper share ONE
-// contract instead of two copies drifting apart.
+// digits, key normalisation — is owned by the core entry point and re-exported
+// here, so a host app and every framework wrapper share ONE contract instead of
+// two copies drifting apart.
 import {
   BS_WEEKDAY_LABELS,
   NEPALI_DIGITS,
@@ -17,7 +17,7 @@ import {
   type BsDateString,
   type BsLocale,
   type BsWeekdayLabels,
-} from "nepali-calendar-toolkit";
+} from "../index";
 
 export { BS_WEEKDAY_LABELS, NEPALI_DIGITS, normalizeBsKey, toPickerDigits };
 export type { BsDateString, BsLocale, BsWeekdayLabels };

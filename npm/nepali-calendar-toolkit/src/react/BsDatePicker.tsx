@@ -11,7 +11,7 @@ import {
   isBsKeyDisabled,
   type BsPickerViewState,
 } from "./controller";
-import { sameBsDay } from "nepali-calendar-toolkit";
+import { convertToAd, sameBsDay } from "../index";
 import {
   formatBsLabel,
   normalizeBsKey,
@@ -205,15 +205,21 @@ function useAdOf(selectedKey: string | null): string | null {
   useEffect(() => {
     if (!selectedKey) { setAd(null); return; }
     let alive = true;
-    void import("nepali-calendar-toolkit").then((nct) => {
-      const p = selectedKey.split("-").map(Number);
-      return nct.convertToAd({ year: p[0], month: p[1], day: p[2] } as never).then((a) => {
-        if (alive) setAd(a);
-      }).catch(() => { if (alive) setAd(null); });
-    }).catch(() => { if (alive) setAd(null); });
+    // Same-package import (`../index`), NOT a self-referential
+    // `import("nepali-calendar-toolkit")` — resolving the published name from
+    // inside the package that publishes it is not guaranteed to work.
+    void convertToAd(parseBsKeyForAd(selectedKey))
+      .then((a) => { if (alive) setAd(a); })
+      .catch(() => { if (alive) setAd(null); });
     return () => { alive = false; };
   }, [selectedKey]);
   return ad;
+}
+
+/** `normalizeBsKey` is already applied by the caller, so a plain split is safe. */
+function parseBsKeyForAd(key: string): { year: number; month: number; day: number } {
+  const [year, month, day] = key.split("-").map(Number);
+  return { year, month, day };
 }
 
 export function BsDateTrigger(opts: BsTriggerOptions & { open?: boolean; onToggle?: () => void }) {

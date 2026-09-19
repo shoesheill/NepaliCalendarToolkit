@@ -4,14 +4,31 @@
   "description": "Beyond conversion: configurable weekends, holidays, and date ranges for months, quarters, fiscal years, or any custom period. TypeScript port of the C# NepaliCalendarToolkit.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
-    "build": "node scripts/generate-baseline-index.mjs && tsc -p tsconfig.json && node scripts/copy-data.mjs",
-    "prepublishOnly": "npm run build && node test/smoke.test.mjs && node test/browser.test.mjs",
-    "test": "npm run build && node test/smoke.test.mjs && node test/browser.test.mjs",
-    "test:browser": "node test/browser.test.mjs"
+    "build": "node scripts/generate-baseline-index.mjs && tsc -p tsconfig.json && tsc -p tsconfig.react.json && node scripts/copy-data.mjs && node scripts/copy-styles.mjs",
+    "prepublishOnly": "npm run build && npm run test:node && npm run test:browser && npm run test:react",
+    "test": "npm run build && npm run test:node && npm run test:browser && npm run test:react",
+    "test:node": "node test/smoke.test.mjs",
+    "test:browser": "node test/browser.test.mjs",
+    "test:react": "node test/react-free.test.mjs && node test/react.test.mjs && node test/react-dom.test.mjs"
   },
   "keywords": [
     "nepali calendar",
@@ -33,8 +50,20 @@
   "engines": {
     "node": ">=18"
   },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/node": "^26.4.0",
+    "@types/react": "^18.2.56",
+    "jsdom": "^25.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": "^5.6.0"
   }
 }

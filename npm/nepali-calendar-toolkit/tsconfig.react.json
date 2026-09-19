@@ -1,0 +1,13 @@
+{
+  // React entry point (`nepali-calendar-toolkit/react`), compiled separately so the
+  // core build keeps zero React dependency: react lives in an optional peer, and
+  // `import "nepali-calendar-toolkit"` must never pull `react/jsx-runtime`.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/react/**/*"],
+  "exclude": []
+}

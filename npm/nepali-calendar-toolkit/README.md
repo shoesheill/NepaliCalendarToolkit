@@ -51,9 +51,42 @@ grid.leadingBlanks;        // 0=Sun..6=Sat padding before day 1
 grid.cells[0];             // { day, bsKey, adDate, weekday, weekend, holidayName?, today }
 ```
 
-An optional React popup built on top of it ships separately as
-[`nepali-datepicker-react`](https://www.npmjs.com/package/nepali-datepicker-react)
-(`npm install nepali-datepicker-react`).
+## React date picker (`nepali-calendar-toolkit/react`)
+
+A ready-made React popup built on the grid primitives above. It lives at the
+`/react` subpath so `import "nepali-calendar-toolkit"` stays React-free — `react`
+is an **optional** peer dependency, and the core entry point still runs in plain
+Node with zero runtime dependencies.
+
+```bash
+npm install nepali-calendar-toolkit react    # react only needed for the /react entry
+```
+
+```tsx
+import { BsDatePicker } from "nepali-calendar-toolkit/react";
+import "nepali-calendar-toolkit/styles.css"; // optional plain-CSS defaults
+
+<BsDatePicker
+  value={value}                 // "2082-04-15" (BS, yyyy-MM-dd)
+  onChange={(s) => setValue(s?.bs ?? null)}
+  min="2082-04-01"
+  max="2082-04-32"
+  locale="ne"                   // Devanagari month/weekday labels + digits
+  classNames={{ daySelected: "bg-purple-600 text-white" }}
+/>
+```
+
+Bring your own trigger and render only the popup:
+
+```tsx
+import { BsDatePickerPopup } from "nepali-calendar-toolkit/react";
+```
+
+The `onChange` payload is `{ bs, value: { year, month, day }, ad, holidayName?, weekend }`.
+Exports: `BsDatePicker`, `BsDatePickerPopup`, `BsDateTrigger` and the headless
+`createBsPickerController` / `isBsKeyDisabled` helpers, so a Vue/Angular/Svelte
+wrapper can reuse the same state machine. Without `styles.css` the `nct-*` classes
+remain for a host stylesheet to override.
 
 ## Data strategy (mirrors the C# package)
 
@@ -66,6 +99,10 @@ Timezone handling uses `Intl` (`Asia/Kathmandu`) — no OS timezone database dep
 
 ```bash
 node scripts/fetch-baseline-data.mjs   # refresh bundled baseline data
-npm test                               # build + smoke tests
-npm publish                            # prepublishOnly builds and re-runs smoke tests
+npm test                               # build + core, browser and /react tests
+npm publish                            # prepublishOnly builds and re-runs the same tests
 ```
+
+`react`, `react-dom` and `jsdom` are **dev-only** here: the core entry point must
+stay React-free, so `src/react/` is compiled by its own `tsconfig.react.json` into
+`dist/react/`. A test asserts that `dist/index.js` never requires `react`.
