@@ -2,16 +2,9 @@ name: Seed Calendar Data
 
 on:
   schedule:
-    # Daily. Nepal Patro publishes predictions ahead of the official gazette and then
-    # confirms them, and holidays for a year land separately again — so the data changes
-    # on no fixed schedule, and an annual run left every mid-year publication sitting
-    # unused until the following April.
-    #
-    # A no-op day is cheap: the seeder skips years already complete AND verified, so once
-    # everything is settled a run is a handful of API calls, and the commit step opens no
-    # PR when nothing changed. What it does buy is that a prediction gets upgraded to
-    # gazetted data within a day of publication instead of within a year.
-    - cron: "0 0 * * *"
+    # Run on the first day of every month, plus April 5 for the Nepali New Year data refresh.
+    - cron: "0 0 1 * *"
+    - cron: "0 0 5 4 *"
   # Allow running the seeder any time from the GitHub Actions UI.
   workflow_dispatch:
     inputs:
