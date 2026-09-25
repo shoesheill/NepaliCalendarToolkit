@@ -1,5 +1,3 @@
-export type HolidayOrWeekend = "holidays" | "weekends" | "both";
-
 export class NepaliDate {
   constructor(
     public readonly year: number,
@@ -31,18 +29,53 @@ export interface YearMeta {
   seededAt?: string;
 }
 
-export interface HolidayData {
-  month: number;
-  day: number;
-  date?: string;
-  name: string;
+/** One rich event occurrence from Events/<year>.json. */
+export interface CalendarEvent {
+  adDate: string;
+  bsMonth: number;
+  bsDay: number;
+  nsYear?: number;
+  nsMonth?: string;
+  nameEn?: string;
+  nameNe?: string;
+  holidayType?: string;
+  category?: string;
+  basedOn?: string;
+  isGovernmentHoliday: boolean;
+  isImportant: boolean;
 }
 
-export interface HolidayInfo {
-  dayName: string;
-  holidayName: string;
-  adDate: string; // yyyy-MM-dd
-  bsDate: string; // yyyy-MM-dd (BS)
+/** Daily details from DayDetails/<year>.json, enriched with display labels. */
+export interface DayDetailsData {
+  adDate: string;
+  bsMonth: number;
+  bsDay: number;
+  tithi?: number;
+  chandrama?: number;
+  nsMonth?: string;
+  nsYear?: number;
+  isVerified: boolean;
+}
+
+/** Daily details from DayDetails/<year>.json, enriched with display labels. */
+export interface CalendarDayInfo {
+  adDate: string;
+  bsDate: NepaliDate;
+  bsMonthName?: string;
+  bsMonthNameEn?: string;
+  dayOfWeek: string;
+  tithi?: number;
+  tithiName?: string;
+  tithiNameEn?: string;
+  chandrama?: number;
+  lunarMonthName?: string;
+  lunarMonthNameEn?: string;
+  paksha?: string;
+  pakshaEn?: string;
+  nsMonth?: string;
+  nsMonthName?: string;
+  nsYear?: number;
+  isVerified: boolean;
 }
 
 export interface CurrentDateInfo {

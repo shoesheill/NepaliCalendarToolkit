@@ -4,15 +4,39 @@ using System.Text.Json.Serialization;
 namespace NepaliCalendarDataSeeder.Models
 {
     /// <summary>
-    ///     The exact holiday shape written to Data/Holidays/{year}.json, matching the
-    ///     NepaliCalendarToolkit.HolidayJson.HolidayData model.
+    ///     Rich event occurrence written to Data/Events/{year}.json. The endpoint is named
+    ///     goverment-holidays, but its response contains festivals, observances and regional
+    ///     events as well as government holidays, so EventOutput is the canonical shape.
     /// </summary>
-    public class HolidayOutput
+    public class EventOutput
     {
-        public int month { get; set; }
-        public int day { get; set; }
-        public string date { get; set; }
-        public string name { get; set; }
+        public string adDate { get; set; }
+        public int bsMonth { get; set; }
+        public int bsDay { get; set; }
+        public int nsYear { get; set; }
+        public string nsMonth { get; set; }
+        public string nameEn { get; set; }
+        public string nameNe { get; set; }
+        public string holidayType { get; set; }
+        public string category { get; set; }
+        public string basedOn { get; set; }
+        public bool isGovernmentHoliday { get; set; }
+        public bool isImportant { get; set; }
+    }
+
+    /// <summary>
+    ///     Daily date-conversion details written to Data/DayDetails/{year}.json.
+    /// </summary>
+    public class DayDetailsOutput
+    {
+        public string adDate { get; set; }
+        public int bsMonth { get; set; }
+        public int bsDay { get; set; }
+        public int? tithi { get; set; }
+        public int? chandrama { get; set; }
+        public string nsMonth { get; set; }
+        public int? nsYear { get; set; }
+        public bool isVerified { get; set; }
     }
 
     /// <summary>
@@ -66,6 +90,8 @@ namespace NepaliCalendarDataSeeder.Models
         public bool Verified { get; set; }
         public bool YearStart { get; set; }
         public int HolidayCount { get; set; }
+        public int EventCount { get; set; }
+        public int DayDetailsCount { get; set; }
         public bool NepaliSambat { get; set; }
     }
 }

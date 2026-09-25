@@ -12,6 +12,10 @@ on:
         description: "Optional BS year to seed up to (e.g. 2085). Empty uses the current BS year."
         required: false
         type: string
+      details_year:
+        description: "Optional BS year to refresh Events + DayDetails for (e.g. 2080). When set, only that detail refresh runs and max_year is ignored."
+        required: false
+        type: string
 
 permissions:
   # contents:write -> commit + push the data branch; pull-requests:write -> create + merge the PR.
@@ -45,6 +49,9 @@ jobs:
           if [ -n "${{ github.event.inputs.max_year }}" ]; then
             ARGS="$ARGS --max-year ${{ github.event.inputs.max_year }}"
           fi
+          if [ -n "${{ github.event.inputs.details_year }}" ]; then
+            ARGS="$ARGS --details-year ${{ github.event.inputs.details_year }}"
+          fi
           dotnet run -c Release --project "$SEEDER_PROJECT" $ARGS
 
       - name: Configure git identity
@@ -57,7 +64,7 @@ jobs:
         run: |
           # -f because .gitignore lists Data/. The existing files commit anyway (tracked
           # files override ignore rules), but a NEW one is skipped silently — which would
-          # have swallowed month-meta.json, and equally Holidays/{year}.json the first time
+          # have swallowed month-meta.json, and equally Events/{year}.json or DayDetails/{year}.json the first time
           # a new year appears.
           git add -f Data SeedInfo.json
           if git diff --cached --quiet; then

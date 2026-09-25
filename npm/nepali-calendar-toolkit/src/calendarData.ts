@@ -1,5 +1,5 @@
-import { getData, getHolidays } from "./dataProvider";
-import { HolidayData, YearMeta } from "./types";
+import { getData } from "./dataProvider";
+import { YearMeta } from "./types";
 
 /**
  * Month lengths are a PREFIX, not necessarily twelve entries. Months publish one at a
@@ -21,10 +21,6 @@ export async function loadCalendarData(): Promise<void> {
   monthLengths = ml ?? {};
   yearStart = ys ?? {};
   yearMeta = mm ?? {};
-}
-
-export async function holidaysFor(year: number): Promise<HolidayData[]> {
-  return getHolidays(year);
 }
 
 export function supportedYears(): number[] {

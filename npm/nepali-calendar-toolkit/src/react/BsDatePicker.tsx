@@ -152,19 +152,19 @@ export function BsDatePickerPopup(props: BsDatePickerPopupProps) {
             const key = normalizeBsKey(cell.bsKey);
             const off = isBsKeyDisabled(key, props, weekdayOf);
             const selected = key != null && selectedKey != null && sameBsDay(key, selectedKey);
-            // Weekend/holiday days are marked by red text alone, so the holiday name
-            // has to ride along on the button's accessible name (and the `title`
+            // Weekend/event days are marked by red text alone, so event names
+            // ride along on the button's accessible name (and the `title`
             // tooltip) instead of a marker glyph. Weekday label is already localised.
             const dayLabel = [
               toPickerDigits(cell.day, nepaliDigits),
               state.weekdayLabels[cell.weekday],
-              cell.holidayName,
+              cell.events.map((event) => event.nameEn || event.nameNe).filter(Boolean).join("; "),
             ].filter(Boolean).join(", ");
             return (
               <button
                 key={cell.bsKey}
                 type="button"
-                title={cell.holidayName ?? cell.adDate}
+                title={cell.events.map((event) => event.nameEn || event.nameNe).filter(Boolean).join("; ") || cell.adDate}
                 aria-label={dayLabel}
                 disabled={disabled || off}
                 onClick={() => { void ctrl.pickDay(cell.day).then(() => onOpenChange?.(false)); }}
@@ -172,8 +172,8 @@ export function BsDatePickerPopup(props: BsDatePickerPopupProps) {
                   "nct-day", cnm.day,
                   selected && cx("nct-sel", cnm.daySelected),
                   !selected && cell.today && cx("nct-today", cnm.dayToday),
-                  !selected && (cell.weekend || cell.holidayName) && cx("nct-we", cnm.dayWeekend),
-                  !selected && cell.holidayName && cx("nct-hol", cnm.dayHoliday),
+                  !selected && (cell.weekend || cell.events.length > 0) && cx("nct-we", cnm.dayWeekend),
+                  !selected && cell.events.length > 0 && cx("nct-hol", cnm.dayHoliday),
                   off && cx("nct-off", cnm.dayDisabled),
                 )}
               >

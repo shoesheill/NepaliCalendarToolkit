@@ -22,13 +22,23 @@ namespace NepaliCalendarDataSeeder.Services
                 case JsonTokenType.Null:
                     return null;
                 case JsonTokenType.Number:
-                    return reader.GetInt32();
+                    if (reader.TryGetInt32(out var integer))
+                        return integer;
+                    if (reader.TryGetDecimal(out var decimalValue) &&
+                        decimal.Truncate(decimalValue) == decimalValue &&
+                        decimalValue >= int.MinValue && decimalValue <= int.MaxValue)
+                        return (int)decimalValue;
+                    return null;
                 case JsonTokenType.String:
                     var s = reader.GetString();
                     if (string.IsNullOrWhiteSpace(s))
                         return null;
                     if (int.TryParse(s.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
                         return parsed;
+                    if (decimal.TryParse(s.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalString) &&
+                        decimal.Truncate(decimalString) == decimalString &&
+                        decimalString >= int.MinValue && decimalString <= int.MaxValue)
+                        return (int)decimalString;
                     return null;
                 default:
                     return null;

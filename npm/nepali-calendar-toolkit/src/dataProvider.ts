@@ -1,10 +1,14 @@
-import { HolidayData } from "./types";
+import { CalendarEvent, DayDetailsData } from "./types";
 import { BASELINE } from "./baselineData";
 
 /**
  * Tiered data provider mirroring the C# DataProvider: live CDN → in-memory cache →
  * bundled baseline snapshot. The baseline JSON files are downloaded at build time
- * by scripts/fetch-baseline-data.mjs from the same NepaliCalendarToolkit repository.
+ * by scripts/fetch-baseline-data.mjs from the same CDN host.
+ *
+ * The CDN mirrors the repository root and calendar data lives under `Data/`, so every
+ * CDN-relative path getData() asks for ("Events/2083.json", "month-lengths.json") is
+ * prefixed with DATA_ROOT.
  */
 
 /**
@@ -13,11 +17,14 @@ import { BASELINE } from "./baselineData";
  * ever run — so every web consumer silently lost all conversions.
  */
 function envDataUrl(): string | undefined {
-  return typeof process !== "undefined" && process.env ? process.env.DATA_URL : undefined;
+  const value = typeof process !== "undefined" && process.env ? process.env.DATA_URL : undefined;
+  if (!value) return undefined;
+  // Without a trailing slash a relative path would silently replace the base's last
+  // segment, so normalise once here instead of relying on the caller.
+  return value.endsWith("/") ? value : value + "/";
 }
 
-let baseUrl =
-  envDataUrl() || "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/";
+let baseUrl = envDataUrl() || "https://cdn.nepali.calendar.localhub.dev/";
 const DATA_ROOT = "Data/";
 export let cacheTtlHours = 12;
 
@@ -78,7 +85,12 @@ export async function getData<T>(path: string): Promise<T | undefined> {
   return result;
 }
 
-export async function getHolidays(year: number): Promise<HolidayData[]> {
-  const data = await getData<HolidayData[]>(`Holidays/${year}.json`);
+export async function getEvents(year: number): Promise<CalendarEvent[]> {
+  const data = await getData<CalendarEvent[]>(`Events/${year}.json`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getDayDetails(year: number): Promise<DayDetailsData[]> {
+  const data = await getData<DayDetailsData[]>(`DayDetails/${year}.json`);
   return Array.isArray(data) ? data : [];
 }

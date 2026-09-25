@@ -18,6 +18,7 @@ import {
   type BsLocale,
   type BsWeekdayLabels,
 } from "../index";
+import type { CalendarEvent } from "../types";
 
 export { BS_WEEKDAY_LABELS, NEPALI_DIGITS, normalizeBsKey, toPickerDigits };
 export type { BsDateString, BsLocale, BsWeekdayLabels };
@@ -39,8 +40,8 @@ export interface BsDateSelection {
   value: BsDateValue;
   /** AD equivalent, yyyy-MM-dd. */
   ad: string;
-  /** Holiday name from `Holidays/<year>.json`, if any. */
-  holidayName?: string;
+  /** Rich event records from `Events/<year>.json`, if any. */
+  events: CalendarEvent[];
   /** True when the day falls on the configured weekend set. */
   weekend: boolean;
 }

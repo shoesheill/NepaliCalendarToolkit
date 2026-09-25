@@ -249,7 +249,7 @@ export function createBsPickerController(
       if (!parsed) return;
       try {
         const ad = await convertToAd({ year: parsed.year, month: parsed.month, day: parsed.day } as never);
-        opts.onChange?.({ bs: key, value: parsed, ad, holidayName: cell.holidayName, weekend: cell.weekend });
+        opts.onChange?.({ bs: key, value: parsed, ad, events: cell.events, weekend: cell.weekend });
       } catch { /* unpublished tail - keep old value */ }
     },
     dispose(): void { disposed = true; requestId++; },

@@ -1,15 +1,16 @@
 # Nepali Calendar Toolkit
 
-Beyond conversion: This toolkit made easy – configurable weekends, holidays, and date ranges for months, quarters, fiscal years, or any custom period.
+Beyond conversion: This toolkit made easy – configurable weekends, rich events, daily tithi/lunar details, and date ranges for months, quarters, fiscal years, or any custom period.
 
 ## Features
 
 - Convert between Nepali (Bikram Sambat) and Gregorian (AD) dates
-- Get Nepali public holidays
+- Get rich events: festivals, government holidays, and observances
+- Get daily details: tithi, paksha, lunar month, weekday, and Nepal Sambat labels
 - Calculate weekends(configurable) for Nepali dates
 - Work with Nepali fiscal years (starts on Shrawan 1st and ends on Ashar end)
 - Get date ranges for Nepali months, quarters, and fiscal years
-- JSON-based holiday data storage
+- JSON-based events and daily-details data storage
 
 ## Installation
 
@@ -25,26 +26,26 @@ dotnet add package NepaliCalendarToolkit
 
 ## Usage
 
-### Get Holidays and Weekends
+### Get Events and Daily Details
 
 ```csharp
-// Get all holidays and weekends for a specific year
-var holidaysAndWeekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2082);
+// Tithi, paksha, lunar month, weekday, and Nepal Sambat labels
+var day = NepaliCalendarConverter.GetDayDetails(new NepaliDate(2083, 6, 5));
+Console.WriteLine($"{day.TithiNumber} {day.TithiName}, {day.Paksha} paksha, {day.LunarMonthName}");
 
-// Get only holidays for a specific month in a year
-var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2082, 1, HolidayOrWeekendEnum.Holidays);
-
-// Get only weekends for a specific month in a year
-var weekends = NepaliCalendarConverter.GetHolidaysAndWeekends(2082, 1, HolidayOrWeekendEnum.Weekends);
+// Rich events for a year, a month, or one date
+var yearEvents = NepaliCalendarConverter.GetEvents(2083);
+var monthEvents = NepaliCalendarConverter.GetEvents(2083, month: 5);
+var dateEvents = NepaliCalendarConverter.GetEventsForDate(new NepaliDate(2083, 5, 12));
 ```
+
+> **Note:** the old `GetHolidaysAndWeekends` API and `HolidayInfo` model were removed;
+> use `GetEvents` / `GetEventsForDate` instead. Weekend checks use the configured
+> weekend days (see below).
 
 ### Get Available Date Ranges
 
 ```csharp
-// Get the year range for which holiday data is available
-var (minHolidayYear, maxHolidayYear) = NepaliCalendarConverter.GetAvailableHolidayYearsBS();
-// Example output: minHolidayYear: 2065, maxHolidayYear: 2083
-
 // Get the supported Nepali calendar year range
 var (minCalendarYear, maxCalendarYear) = NepaliCalendarConverter.GetAvailableCalendarYearsBS();
 // Example output: minCalendarYear: 2065, maxCalendarYear: 2083
@@ -84,16 +85,13 @@ var nepaliDate = NepaliCalendarConverter.ConvertToNepali(gregorianDate);
 // Get date range for a Nepali fiscal year
 var fiscalYearRange = NepaliCalendarConverter.GetFiscalYearDateRangeInAD(2080);
 // Result: StartDate: 2023-07-17, EndDate: 2024-07-15
-
-// Get holidays for a fiscal year
-var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscalYear(2080);
 ```
 
 ## Data Source
 
-The toolkit loads its data from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repository via **jsDelivr CDN**, and stays fully functional offline. This includes:
+The toolkit loads its data from the [NepaliCalendarToolkit](https://github.com/shoesheill/NepaliCalendarToolkit) repository through its CDN mirror at `https://cdn.nepali.calendar.localhub.dev/` (the mirror serves the repository root; calendar data lives under `Data/`), and stays fully functional offline. This includes:
 
-- Holiday data from 2065 BS
+- Event data under `Data/Events/{year}.json` and daily details under `Data/DayDetails/{year}.json`
 - Month lengths data for Nepali calendar calculations
 - Year start dates for Nepali calendar
 
@@ -102,16 +100,16 @@ The toolkit loads its data from the [NepaliCalendarToolkit](https://github.com/s
 Data is resolved in three layers, so it is always fresh when online but never breaks offline:
 
 1. **Live CDN** – the source of truth. Whenever the toolkit is online it fetches the latest data from the
-   configured base URL (defaults to `https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/`).
-   Because this points at the `master` branch, **newly added data is picked up automatically without a
-   library version bump.**
+   configured base URL. The project mirror is `https://cdn.nepali.calendar.localhub.dev/`, which serves
+   the repository root: the C# provider expects the base URL of the data folder itself
+   (`https://cdn.nepali.calendar.localhub.dev/Data/`), while the npm package appends `Data/` for you.
+   **Newly added data is picked up automatically without a library version bump.**
 2. **Persistent disk cache** – every successful fetch is stored under
    `%LOCALAPPDATA%\NepaliCalendarToolkit\Cache\`. If the device later goes offline, the most recently
-   fetched data is used, so the calendar, holidays, weeks and date ranges all keep working.
-3. **Bundled baseline** – a copy of the data (month-lengths, year-starts and holidays up to 2073 BS)
-   ships inside the NuGet package, so even a first run with no network and no cache still works. To add
-   more years, drop the corresponding `Holidays/{year}.json` files into the `Data/Holidays/` folder before
-   building – they are embedded automatically.
+   fetched data is used, so the calendar, events, weeks and date ranges all keep working.
+3. **Bundled baseline** – the repository-root `Data/` folder (month lengths, year starts, events and
+   daily details) is embedded into the NuGet package at build time, so even a first run with no network
+   and no cache still works. New files placed there by the seeder are picked up on the next build.
 
 The CDN is consulted at most once every **12 hours** per data file; within that window a cached copy is
 served for speed and offline reliability.
@@ -122,37 +120,50 @@ The CDN URL is **not hard-coded**. Set it at deployment time in one of two ways:
 
 ```csharp
 // From appsettings (read your config, then call Configure once at startup):
+// The base URL must be the folder that contains month-lengths.json (the Data folder).
 NepaliCalendarToolkit.Helpers.DataProvider.Configure(
-    baseUrl: "https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/",
+    baseUrl: "https://cdn.nepali.calendar.localhub.dev/Data/",
     cacheTtlHours: 12);
 ```
 
 Or set the `DATA_URL` environment variable, which is read automatically:
 
 ```
-set DATA_URL=https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/
+set DATA_URL=https://cdn.nepali.calendar.localhub.dev/Data/
 ```
 
 If no URL is configured and there is no cache, the embedded baseline is used.
 
 
 
-## Holiday Data Structure
+## Event and Daily Data Structure
 
-The holiday data is stored in JSON format with the following structure:
+Events live in `Data/Events/{year}.json`, one file per BS year:
 
 ```json
 [
   {
-    "month": 1,
-    "day": 11,
-    "date": "2008-04-23",
-    "name": "Loktantra Diwas"
+    "adDate": "2026-08-28",
+    "bsMonth": 5,
+    "bsDay": 12,
+    "nsYear": 1146,
+    "nsMonth": "19.0",
+    "nameEn": "Rakshya Bandhan",
+    "nameNe": "रक्षाबन्धन",
+    "holidayType": "Government Holiday",
+    "category": "national",
+    "basedOn": "NS",
+    "isGovernmentHoliday": true,
+    "isImportant": true
   }
 ]
 ```
 
-Each year has its own JSON file named with the BS year (e.g., "2080.json").
+Daily details live in `Data/DayDetails/{year}.json` with one record per day
+(`adDate`, `bsMonth`, `bsDay`, `tithi`, `chandrama`, `nsMonth`, `nsYear`, `isVerified`).
+Records stay deliberately lean: the BS year is the file name, and provider-specific
+identifiers, media URLs and provider bookkeeping (`bsDate`, `remarks`, `updatedAt`)
+are not stored.
 
 ## License
 
@@ -272,20 +283,21 @@ Response:
 }
 ```
 
-### 7. GetHolidaysAndWeekends
+### 7. GetEvents
 
-**Description:** Retrieves a list of holidays and weekends for a specified year and optional month.
+**Description:** Retrieves rich event occurrences (festivals, government holidays, observances) for a BS year, optionally filtered by month or to government holidays only.
 
 **Implementation:**
 
 ```csharp
-var holidays = NepaliCalendarConverter.GetHolidaysAndWeekends(2080);
+var events = NepaliCalendarConverter.GetEvents(2080);
+var bhadraEvents = NepaliCalendarConverter.GetEvents(2080, month: 5);
 ```
 
 Response:
 
 ```csharp
-List<HolidayInfo> { ... } // Contains holiday information for the year 2080
+List<CalendarEvent> { ... } // AD/BS dates, names, category, holiday type, Nepal Sambat fields
 ```
 
 ### 8. GetFiscalYearDateRangeInAD
@@ -307,18 +319,18 @@ Response:
 }
 ```
 
-### 9. GetHolidaysAndWeekendsForFiscalYear
+### 9. GetDayDetails
 
-**Description:** Retrieves a list of holidays and weekends for a specified fiscal year.
+**Description:** Retrieves daily date-conversion details for a BS date: tithi, chandrama (lunar day number), paksha, lunar month, weekday, and Nepal Sambat labels.
 
 **Implementation:**
 
 ```csharp
-var fiscalYearHolidays = NepaliCalendarConverter.GetHolidaysAndWeekendsForFiscalYear(2080);
+var day = NepaliCalendarConverter.GetDayDetails(new NepaliDate(2083, 6, 5));
 ```
 
 Response:
 
 ```csharp
-List<HolidayInfo> { ... } // Contains holiday information for the fiscal year 2080-81
+CalendarDayInfo { ... } // tithi 10 (दशमी), paksha शुक्ल, lunar month भाद्र, NS year 1146
 ```

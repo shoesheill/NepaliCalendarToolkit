@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using NepaliCalendarToolkit.Enum;
 using NepaliCalendarToolkit.Helpers;
 using NepaliCalendarToolkit.Models;
 using NepaliCalendarToolkit.Utilities;
@@ -80,6 +79,114 @@ namespace NepaliCalendarToolkit.Converters
             daysToAdd += nepaliDate.GetDay - 1;
 
             return startDate.AddDays(daysToAdd);
+        }
+
+        /// <summary>
+        ///     Gets the daily date-conversion details for a BS date, including tithi,
+        ///     lunar fortnight/month and Nepal Sambat labels.
+        /// </summary>
+        public static CalendarDayInfo GetDayDetails(NepaliDate nepaliDate)
+        {
+            if (nepaliDate == null) throw new ArgumentNullException(nameof(nepaliDate));
+            if (!MonthLengths.Lengths.ContainsKey(nepaliDate.GetYear))
+                throw new ArgumentException($"Year {nepaliDate.GetYear} is not supported.", nameof(nepaliDate));
+
+            var details = DayDetailsJson.GetDayDetails(nepaliDate.GetYear)
+                .FirstOrDefault(x => x.BsMonth == nepaliDate.GetMonth && x.BsDay == nepaliDate.GetDay);
+
+            if (details == null)
+                throw new ArgumentException(
+                    $"Daily details for {nepaliDate} are not available. Seed Data/DayDetails/{nepaliDate.GetYear}.json first.",
+                    nameof(nepaliDate));
+
+            var adDate = DateTime.ParseExact(details.AdDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return new CalendarDayInfo(
+                adDate,
+                new NepaliDate(nepaliDate.GetYear, details.BsMonth, details.BsDay),
+                CalendarLookup.GetBsMonthName(details.BsMonth),
+                CalendarLookup.GetBsMonthNameEn(details.BsMonth),
+                adDate.DayOfWeek,
+                details.Tithi,
+                CalendarLookup.GetTithiName(details.Tithi),
+                CalendarLookup.GetTithiNameEn(details.Tithi),
+                details.Chandrama,
+                CalendarLookup.GetLunarMonthName(details.Chandrama),
+                CalendarLookup.GetLunarMonthNameEn(details.Chandrama),
+                CalendarLookup.GetPaksha(details.Chandrama),
+                CalendarLookup.GetPakshaEn(details.Chandrama),
+                details.NsMonth,
+                CalendarLookup.GetNepaliSambatMonthName(details.NsMonth),
+                details.NsYear,
+                details.IsVerified);
+        }
+
+        /// <summary>Gets daily date-conversion details for an AD date.</summary>
+        public static CalendarDayInfo GetDayDetails(DateTime adDate)
+        {
+            return GetDayDetails(ConvertToNepali(adDate));
+        }
+
+        /// <summary>
+        ///     Gets all event occurrences for a BS year, optionally filtered by month or to
+        ///     government holidays only.
+        /// </summary>
+        public static List<CalendarEvent> GetEvents(
+            int yearBs,
+            int? month = null,
+            bool governmentHolidaysOnly = false)
+        {
+            if (!MonthLengths.Lengths.ContainsKey(yearBs))
+                throw new ArgumentException($"Year {yearBs} is not supported.", nameof(yearBs));
+            if (month.HasValue && (month.Value < 1 || month.Value > 12))
+                throw new ArgumentException("Month must be between 1 and 12.", nameof(month));
+
+            return EventJson.GetEvents(yearBs)
+                .Where(x => (!month.HasValue || x.BsMonth == month.Value) &&
+                            (!governmentHolidaysOnly || x.IsGovernmentHoliday))
+                .Select(x => ToCalendarEvent(x, yearBs))
+                .OrderBy(x => x.AdDate)
+                .ThenBy(x => x.BsDate.GetMonth)
+                .ThenBy(x => x.BsDate.GetDay)
+                .ThenBy(x => x.NameEn, StringComparer.Ordinal)
+                .ToList();
+        }
+
+        /// <summary>Gets every event occurrence on one BS date.</summary>
+        public static List<CalendarEvent> GetEventsForDate(
+            NepaliDate nepaliDate,
+            bool governmentHolidaysOnly = false)
+        {
+            if (nepaliDate == null) throw new ArgumentNullException(nameof(nepaliDate));
+            return GetEvents(nepaliDate.GetYear, nepaliDate.GetMonth, governmentHolidaysOnly)
+                .Where(x => x.BsDate.GetDay == nepaliDate.GetDay)
+                .ToList();
+        }
+
+        /// <summary>Gets every event occurrence on one AD date.</summary>
+        public static List<CalendarEvent> GetEventsForDate(
+            DateTime adDate,
+            bool governmentHolidaysOnly = false)
+        {
+            return GetEventsForDate(ConvertToNepali(adDate), governmentHolidaysOnly);
+        }
+
+        private static CalendarEvent ToCalendarEvent(EventJson.EventData data, int year)
+        {
+            var adDate = DateTime.ParseExact(data.AdDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return new CalendarEvent
+            {
+                AdDate = adDate,
+                BsDate = new NepaliDate(year, data.BsMonth, data.BsDay),
+                NepaliSambatYear = data.NsYear,
+                NepaliSambatMonthCode = data.NsMonth,
+                NameEn = data.NameEn,
+                NameNe = data.NameNe,
+                HolidayType = data.HolidayType,
+                Category = data.Category,
+                BasedOn = data.BasedOn,
+                IsGovernmentHoliday = data.IsGovernmentHoliday,
+                IsImportant = data.IsImportant
+            };
         }
 
         /// <summary>
@@ -336,63 +443,6 @@ namespace NepaliCalendarToolkit.Converters
 
                 return (startDate.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd"));
             }
-        }
-
-        /// <summary>
-        ///     Gets holidays and weekends for a specific year or fiscal year
-        /// </summary>
-        /// <param name="yearBs">Nepali year in BS</param>
-        /// <param name="month">Optional month to filter (1-12)</param>
-        /// <param name="returnType">Type of days to return (holidays, weekends, or both)</param>
-        /// <param name="isFiscalYear">Whether to interpret the year as a fiscal year</param>
-        /// <returns>List of holidays and/or weekends for the specified year/month</returns>
-        public static List<HolidayInfo> GetHolidaysAndWeekends(int yearBs, int? month = null,
-            HolidayOrWeekendEnum returnType = HolidayOrWeekendEnum.Both, bool isFiscalYear = false)
-        {
-            if (isFiscalYear)
-            {
-                // Validate input for fiscal year
-                if (!MonthLengths.Lengths.ContainsKey(yearBs) || !MonthLengths.Lengths.ContainsKey(yearBs + 1))
-                {
-                    var supportedYears = string.Join(", ", MonthLengths.Lengths.Keys.OrderBy(k => k));
-                    throw new ArgumentException(
-                        $"Fiscal year {yearBs}-{(yearBs + 1) % 100} is outside the supported range. Supported years are: {supportedYears}");
-                }
-
-                if (month.HasValue)
-                {
-                    // For a specific month in a fiscal year
-                    if (month.Value < 1 || month.Value > 12)
-                        throw new ArgumentException("Month must be between 1 and 12");
-
-                    // Determine which year the month belongs to in the fiscal year
-                    var actualYear = month.Value >= 4 ? yearBs : yearBs + 1;
-                    return HolidayHelper.GetHolidaysAndWeekends(actualYear, month, returnType);
-                }
-
-                // For the entire fiscal year
-                return HolidayHelper.GetHolidaysAndWeekends(
-                    yearBs, 4, 1,
-                    yearBs + 1, 3, MonthLengths.Lengths[yearBs + 1][3 - 1],
-                    returnType);
-            }
-
-            // For regular year
-            return HolidayHelper.GetHolidaysAndWeekends(yearBs, month, returnType);
-        }
-
-        /// <summary>
-        ///     Gets the available Bikram Sambat (BS) year range for which holiday data is available
-        /// </summary>
-        /// <returns>A tuple containing the minimum and maximum supported BS years for holidays</returns>
-        public static (int MinYear, int MaxYear) GetAvailableHolidayYearsBs()
-        {
-            var years = HolidayJson.GetAvailableYears();
-
-            if (years.Count == 0)
-                return (0, 0);
-
-            return (years.Min(), years.Max());
         }
 
         /// <summary>

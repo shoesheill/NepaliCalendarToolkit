@@ -2,17 +2,17 @@
 
 A .NET library for working with Nepali (Bikram Sambat, BS) dates in calendar and fiscal-year contexts.
 
-![Nepali Calendar Toolkit for .NET overview](https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/NepaliCalendarToolkit/assets/nepali-calendar-toolkit-dotnet-overview.svg)
+![Nepali Calendar Toolkit for .NET overview](https://cdn.nepali.calendar.localhub.dev/NepaliCalendarToolkit/assets/nepali-calendar-toolkit-dotnet-overview.svg)
 
 ## Features
 
 - **Get AD date ranges for Nepali months, weeks, month sequences, quarters, calendar years, and fiscal years—without manually handling variable month lengths or fiscal-year boundaries**
 - Convert Gregorian (AD) dates to Nepali (BS) dates and back
-- Retrieve public holidays and configured weekends by year, month, or fiscal year
-- Filter results to holidays, weekends, or both
+- Retrieve rich events (festivals, government holidays, observances) by BS year, month, or date
+- Retrieve daily details: tithi, paksha, lunar month, weekday, and Nepal Sambat labels
 - Configure weekend days; Saturday and Sunday are the defaults
 - Get a complete summary of the current date, including BS date, quarter, week of month, fiscal year, weekday, and weekend status
-- Check supported calendar and holiday year ranges, available months, and whether a year is provisional
+- Check supported calendar years, available months, and whether a year is provisional
 - Use with .NET Standard 2.0, .NET Standard 2.1, and .NET 9
 
 ## Installation
@@ -92,32 +92,36 @@ Console.WriteLine(fiscalYear.StartDate);
 Console.WriteLine(fiscalYear.EndDate);
 ```
 
-### Get Holidays and Weekends
+### Get Daily Details and Events
 
 ```csharp
-using NepaliCalendarToolkit.Enum;
+// Tithi, paksha, lunar month, weekday, and Nepal Sambat labels for one BS date
+var day = NepaliCalendarConverter.GetDayDetails(new NepaliDate(2083, 6, 5));
 
-// All holidays and weekends in a year
-var yearDays = NepaliCalendarConverter.GetHolidaysAndWeekends(2081);
+Console.WriteLine(day.AdDate);           // 2026-09-21
+Console.WriteLine(day.TithiNumber);      // 10
+Console.WriteLine(day.Paksha);           // शुक्ल
+Console.WriteLine(day.LunarMonthName);   // भाद्र
+Console.WriteLine(day.NepaliSambatYear); // 1146
 
-// Holidays in one month
-var monthHolidays = NepaliCalendarConverter.GetHolidaysAndWeekends(
-    2081, 1, HolidayOrWeekendEnum.Holidays);
-
-// Weekends in one month
-var monthWeekends = NepaliCalendarConverter.GetHolidaysAndWeekends(
-    2081, 1, HolidayOrWeekendEnum.Weekends);
-
-// All holidays and weekends in a fiscal year
-var fiscalYearDays = NepaliCalendarConverter.GetHolidaysAndWeekends(
-    2080,
-    returnType: HolidayOrWeekendEnum.Both,
-    isFiscalYear: true);
+// Rich events: festivals, government holidays, observances
+var yearEvents = NepaliCalendarConverter.GetEvents(2083);
+var monthEvents = NepaliCalendarConverter.GetEvents(2083, month: 5);
+var dateEvents = NepaliCalendarConverter.GetEventsForDate(
+    new NepaliDate(2083, 5, 12));
 ```
+
+`CalendarEvent` records carry the AD date, BS month/day (the year is the file name), English/Nepali
+names, category, holiday type, government-holiday flag, and Nepal Sambat fields. Provider-specific
+identifiers, media URLs and provider bookkeeping are intentionally not stored.
+
+> **Breaking change:** `HolidayInfo`, `HolidayJson`, `HolidayOrWeekendEnum`, and
+> `GetHolidaysAndWeekends` were removed. Use `GetEvents` / `GetEventsForDate` for
+> events and `GetDayDetails` for tithi and lunar details.
 
 ### Configure Weekend Days
 
-The default weekend is Saturday and Sunday. Weekend configuration applies to holiday/weekend results and current-date information.
+The default weekend is Saturday and Sunday. Weekend configuration applies to weekend checks and current-date information.
 
 ```csharp
 // Saturday only
@@ -158,13 +162,11 @@ var fiscalToday = NepaliCalendarConverter.GetCurrentDateInfo(
 
 ```csharp
 var calendarYears = NepaliCalendarConverter.GetAvailableCalendarYearsBs();
-var holidayYears = NepaliCalendarConverter.GetAvailableHolidayYearsBs();
 
 int knownMonths = NepaliCalendarConverter.GetKnownMonthsBs(2081);
 bool provisional = NepaliCalendarConverter.IsProvisionalBs(2081);
 
 Console.WriteLine($"Calendar years: {calendarYears.MinYear}-{calendarYears.MaxYear}");
-Console.WriteLine($"Holiday years: {holidayYears.MinYear}-{holidayYears.MaxYear}");
 Console.WriteLine($"Known months in 2081 BS: {knownMonths}");
 Console.WriteLine($"2081 BS is provisional: {provisional}");
 ```
@@ -173,4 +175,4 @@ Console.WriteLine($"2081 BS is provisional: {provisional}");
 
 - Nepali months are represented by numbers from `1` (Baisakh) to `12` (Chaitra).
 - A Nepali fiscal year starts on Shrawan 1 and ends at the end of Ashadh in the following BS year.
-- Calls outside the supported calendar or holiday coverage throw an exception.
+- Calls outside the supported calendar coverage throw an exception.

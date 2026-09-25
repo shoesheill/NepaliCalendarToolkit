@@ -16,6 +16,8 @@ namespace NepaliCalendarDataSeeder
     ///       --date      yyyy-MM-dd   reference AD date (default: today)
     ///       --offset    N            seed N BS years beyond the current BS year (default: 1)
     ///       --max-year  N            seed up to the given BS year (overrides offset)
+    ///       --details-year N         refresh Events and DayDetails for one BS year
+    ///       --details-month N        limit a details refresh to one month (requires --details-year)
     /// </summary>
     public static class Program
     {
@@ -37,6 +39,8 @@ namespace NepaliCalendarDataSeeder
             // API publishes it, instead of waiting for the scheduled run after year-end.
             var offset = 1;
             int? maxYear = null;
+            int? detailsYear = null;
+            int? detailsMonth = null;
 
             for (var i = 0; i < args.Length; i++)
             {
@@ -51,6 +55,12 @@ namespace NepaliCalendarDataSeeder
                         break;
                     case "--max-year":
                         maxYear = int.Parse(args[++i], CultureInfo.InvariantCulture);
+                        break;
+                    case "--details-year":
+                        detailsYear = int.Parse(args[++i], CultureInfo.InvariantCulture);
+                        break;
+                    case "--details-month":
+                        detailsMonth = int.Parse(args[++i], CultureInfo.InvariantCulture);
                         break;
                     default:
                         Console.WriteLine($"Unknown argument ignored: {args[i]}");
@@ -68,7 +78,7 @@ namespace NepaliCalendarDataSeeder
 
             try
             {
-                await seeder.RunAsync(date, offset, maxYear);
+                await seeder.RunAsync(date, offset, maxYear, detailsYear, detailsMonth);
                 return 0;
             }
             catch (Exception ex)

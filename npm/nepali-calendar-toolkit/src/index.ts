@@ -1,8 +1,8 @@
 export * from "./types";
 export * from "./converter";
 export * from "./ranges";
-export * from "./holidays";
 export * from "./currentDate";
+export * from "./details";
 export { configure } from "./dataProvider";
 export {
   loadCalendarData,
@@ -14,7 +14,8 @@ export {
   isProvisional,
   getYearInfo,
 } from "./calendarData";
-export { isWeekend } from "./weekend";
+export { isWeekend, setWeekendDays, getWeekendDays } from "./weekend";
+export { setWeekendDays as configureWeekendDays, getWeekendDays as getConfiguredWeekendDays } from "./weekend";
 export {
   buildMonthGrid,
   daysInBsMonth,

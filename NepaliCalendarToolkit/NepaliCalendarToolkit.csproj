@@ -39,8 +39,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- Bundled offline baseline, shipped inside the NuGet package as embedded resources. -->
-        <EmbeddedResource Include="Data\**\*.json"/>
+        <!-- Bundled offline baseline, shipped inside the NuGet package as embedded resources.
+             The canonical calendar data lives in the repository-root Data folder (also written
+             by tools/NepaliCalendarDataSeeder). Files are embedded with Data/<path> logical
+             names so DataProvider.GetEmbedded("Events/2083.json") resolves them; a missing
+             folder simply embeds nothing. -->
+        <EmbeddedResource Include="..\Data\**\*.json">
+            <LogicalName>Data.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
@@ -48,3 +54,4 @@
     </ItemGroup>
 
 </Project>
+F

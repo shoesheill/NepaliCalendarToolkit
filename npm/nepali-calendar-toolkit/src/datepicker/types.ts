@@ -9,13 +9,15 @@ export type BsDateString = string;
 /** Calendar locale: English or Nepali month/day names. */
 export type BsLocale = "en" | "ne";
 
+import type { CalendarEvent } from "../types";
+
 export interface BsDateSelection {
   /** BS date, zero-padded: "2082-04-15". */
   bs: BsDateString;
   /** AD equivalent, yyyy-MM-dd. */
   ad: string;
-  /** Holiday name from `Holidays/<year>.json`, if any. */
-  holidayName?: string;
+  /** Rich event records from `Events/<year>.json`, if any. */
+  events: CalendarEvent[];
   /** True when the day falls on the configured weekend set. */
   weekend: boolean;
 }

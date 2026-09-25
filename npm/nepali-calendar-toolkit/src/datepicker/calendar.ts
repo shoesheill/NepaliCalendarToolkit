@@ -1,11 +1,12 @@
 // ─── Month grid model ────────────────────────────────────────────────────────
 // Framework-free view model for one BS month: leading padding, day cells and
-// a trailing pad so every month renders a stable 6×7 grid. Holidays resolve
-// from the year's `Holidays/<year>.json`; weekends from the configurable set
+// trailing pad so every month renders a stable 6×7 grid. Events resolve
+// from the year's `Events/<year>.json`; weekends from the configurable set
 // (default Saturday + Sunday, JS day numbers). Everything here is plain data —
 // no DOM — so any framework (or none) can render it.
 
-import { holidaysFor, knownMonths, monthLengths } from "../calendarData";
+import { getEvents } from "../dataProvider";
+import { knownMonths, monthLengths } from "../calendarData";
 import { convertToAd, MONTH_NAMES_EN, MONTH_NAMES_NP } from "../converter";
 import { formatDateString, parseDateString } from "../dateHelper";
 import { isWeekend } from "../weekend";
@@ -21,8 +22,8 @@ export interface BsDayCell {
   weekday: number;
   /** True for Saturday/Sunday (or the configured weekend set). */
   weekend: boolean;
-  /** Holiday name from `Holidays/<year>.json`, if any. */
-  holidayName?: string;
+  /** Rich event records from `Events/<year>.json`, if any. */
+  events: import("../types").CalendarEvent[];
   /** True when the day equals the supplied `today` key. */
   today: boolean;
 }
@@ -49,8 +50,8 @@ export function daysInBsMonth(year: number, month: number): number | null {
 
 /**
  * Builds the grid for one BS month. Resolves leading blanks from the AD
- * weekday of day 1 and tags each cell with weekend + holiday flags. Holidays
- * failing to load (a year with no `Holidays/<year>.json`) degrade to
+ * weekday of day 1 and tags each cell with weekend + event flags. Events
+ * failing to load (a year with no `Events/<year>.json`) degrade to
  * weekend-only marking rather than throwing.
  */
 export async function buildMonthGrid(
@@ -64,12 +65,16 @@ export async function buildMonthGrid(
   const firstAd = await convertToAd({ year, month, day: 1 } as never);
   const leadingBlanks = parseDateString(firstAd).getUTCDay();
 
-  let holidays: Map<string, string>;
+  let events: Map<string, import("../types").CalendarEvent[]>;
   try {
-    const list = await holidaysFor(year);
-    holidays = new Map(list.filter((h) => h.month === month).map((h) => [`${year}-${month}-${h.day}`, h.name]));
+    const list = await getEvents(year);
+    events = new Map();
+    for (const event of list.filter((e) => e.bsMonth === month)) {
+      const key = `${year}-${month}-${event.bsDay}`;
+      events.set(key, [...(events.get(key) ?? []), event]);
+    }
   } catch {
-    holidays = new Map();
+    events = new Map();
   }
 
   const cells: BsDayCell[] = [];
@@ -83,7 +88,7 @@ export async function buildMonthGrid(
       adDate,
       weekday,
       weekend: isWeekend(weekday),
-      holidayName: holidays.get(bsKey),
+      events: events.get(bsKey) ?? [],
       today: todayBsKey === bsKey,
     });
   }

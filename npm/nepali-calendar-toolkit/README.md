@@ -1,17 +1,17 @@
 # Nepali Calendar Toolkit for JavaScript and TypeScript
 
-A practical Nepali (Bikram Sambat, BS) calendar toolkit for applications, dashboards, reports, and business workflows. Convert dates, generate reporting periods, work with holidays and weekends, and add a customizable Nepali date picker to web applications.
+A practical Nepali (Bikram Sambat, BS) calendar toolkit for applications, dashboards, reports, and business workflows. Convert dates, generate reporting periods, work with rich events, daily tithi/lunar details and configurable weekends, and add a customizable Nepali date picker to web applications.
 
-![Nepali Calendar Toolkit for JavaScript and React overview](https://cdn.jsdelivr.net/gh/shoesheill/NepaliCalendarToolkit@main/npm/nepali-calendar-toolkit/assets/nepali-calendar-toolkit-overview.svg)
+![Nepali Calendar Toolkit for JavaScript and React overview](https://cdn.nepali.calendar.localhub.dev/npm/nepali-calendar-toolkit/assets/nepali-calendar-toolkit-overview.svg)
 
 ## Features
 
 - **Get AD date ranges for Nepali months, weeks, month sequences, quarters, calendar years, and fiscal years—without manually handling variable month lengths or fiscal-year boundaries**
 - Add a ready-to-use React date picker with English and Nepali labels; build custom picker UIs in other frameworks with the exported calendar-grid primitives
-- Customize date-picker colors, selected days, holidays, weekends, disabled dates, typography, and layout
+- Customize date-picker colors, selected days, event markers, weekends, disabled dates, typography, and layout
 - Convert Gregorian (AD) dates to Nepali (BS) dates and back
-- Retrieve public holidays and configured weekends by year, month, or fiscal year
-- Filter results to holidays, weekends, or both
+- Retrieve rich events (festivals, government holidays, observances) by BS year, month, or date
+- Retrieve daily details: tithi, paksha, lunar month, weekday, and Nepal Sambat labels
 - Configure weekend days; Saturday and Sunday are the defaults
 - Get current-date information, including BS date, quarter, week of month, fiscal year, weekday, and weekend status
 - Build a Nepali month grid in plain JavaScript or any UI framework
@@ -97,13 +97,16 @@ console.log(fiscalYear.startDate, fiscalYear.endDate);
 
 Pass `true` as the final argument when `yearBs` represents the starting year of a Nepali fiscal year. Fiscal quarters follow the Nepali fiscal calendar: Shrawan–Ashwin, Kartik–Poush, Magh–Chaitra, and Baisakh–Ashadh.
 
-## Holidays and Weekends
+## Events, Daily Details, and Weekends
 
 ```ts
 import {
   configureWeekendDays,
   getConfiguredWeekendDays,
-  getHolidaysAndWeekends,
+  getEvents,
+  getEventsForDate,
+  getDayDetails,
+  NepaliDate,
 } from "nepali-calendar-toolkit";
 
 // JavaScript weekday numbers: 0 = Sunday ... 6 = Saturday
@@ -113,33 +116,25 @@ configureWeekendDays(5, 6); // Friday and Saturday
 
 const weekendDays = getConfiguredWeekendDays();
 
-// Holidays and weekends for a BS year
-const yearDays = await getHolidaysAndWeekends(2081);
+// Every event of a BS year (festivals, government holidays, observances)
+const yearEvents = await getEvents(2083);
 
-// Holidays for one month
-const monthHolidays = await getHolidaysAndWeekends(
-  2081,
-  1,
-  "holidays",
-);
+// One month, or one date
+const bhadraEvents = await getEvents(2083, 5);
+const dateEvents = await getEventsForDate(new NepaliDate(2083, 5, 12));
 
-// Weekends for one month
-const monthWeekends = await getHolidaysAndWeekends(
-  2081,
-  1,
-  "weekends",
-);
-
-// Holidays and weekends for a full fiscal year
-const fiscalYearDays = await getHolidaysAndWeekends(
-  2080,
-  undefined,
-  "both",
-  true,
-);
+// Daily details: tithi, paksha, lunar month, weekday, Nepal Sambat labels
+const day = await getDayDetails(new NepaliDate(2083, 6, 5));
+console.log(day.tithi, day.tithiName);        // 10 दशमी
+console.log(day.paksha, day.pakshaEn);        // शुक्ल Shukla
+console.log(day.lunarMonthName, day.nsYear);  // भाद्र 1146
 ```
 
-Each result contains its weekday, holiday name, AD date, and BS date. The holiday name is empty for a weekend-only result.
+Pass `true` as the second argument of `getEventsForDate` (or the third of `getEvents`) to keep government holidays only.
+
+Each event record carries its AD date, BS month/day (the year is the file name), English/Nepali names, category, holiday type, government-holiday/important flags, and Nepal Sambat fields. Provider-specific identifiers, media URLs and provider bookkeeping are deliberately not stored.
+
+> **Breaking change:** the holiday-only `getHolidaysAndWeekends` API, the `HolidayInfo` type, and the `Holidays/` data files were replaced by `getEvents` / `getEventsForDate` plus `getDayDetails`.
 
 ## Current Date and Calendar Coverage
 
@@ -212,13 +207,13 @@ The picker provides:
 - Month and year navigation
 - English (`en`) and Nepali (`ne`) month and weekday labels
 - Optional Devanagari digits
-- Selected, today, holiday, weekend, and disabled-day states
+- Selected, today, event, weekend, and disabled-day states
 - Minimum and maximum BS dates
 - Individual disabled dates and disabled weekdays
 - AD-date display for the selected day
 - Controlled and externally managed popup behavior
 
-The `onChange` payload includes the selected BS date, structured BS year/month/day, AD equivalent, optional holiday name, and weekend status.
+The `onChange` payload includes the selected BS date, structured BS year/month/day, AD equivalent, the day's rich events, and weekend status.
 
 ## Customize the Date Picker
 
@@ -376,10 +371,11 @@ console.log(grid.leadingBlanks);       // Weekday position of day 1
 console.log(grid.cells[0]);
 ```
 
-Each day cell includes its BS day, BS key, AD date, weekday, weekend status, optional holiday name, and today status. Use these values to render any calendar design you want.
+Each day cell includes its BS day, BS key, AD date, weekday, weekend status, the day's rich events, and today status. Use these values to render any calendar design you want.
 
 ## Notes
 
 - Nepali months use numbers `1` (Baisakh) through `12` (Chaitra).
 - A Nepali fiscal year starts on Shrawan 1 and ends at the end of Ashadh in the following BS year.
-- Requests outside the supported calendar or holiday range throw an error.
+- The core loads its data from the CDN mirror `https://cdn.nepali.calendar.localhub.dev/` (the repository root; the library reads its `Data/` folder) and falls back to the bundled baseline when offline. Point `configure(baseUrl)` or `DATA_URL` at another repository root containing `Data/month-lengths.json` to self-host.
+- Requests outside the supported calendar range throw an error.

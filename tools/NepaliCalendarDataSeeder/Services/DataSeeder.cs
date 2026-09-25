@@ -10,9 +10,8 @@ using NepaliCalendarDataSeeder.Models;
 namespace NepaliCalendarDataSeeder.Services
 {
     /// <summary>
-    ///     Incrementally seeds calendar data (month lengths, year starts, holidays and a
-    ///     Nepal Sambat reference) from the Nepal Patro API, writing the same JSON shapes
-    ///     used by the NepaliCalendarToolkit library.
+    ///     Incrementally seeds calendar data (month lengths, year starts, daily details, events
+    ///     and a Nepal Sambat reference) from the Nepal Patro API.
     /// </summary>
     public class DataSeeder
     {
@@ -23,7 +22,7 @@ namespace NepaliCalendarDataSeeder.Services
         private Dictionary<int, int[]> _monthLengths;
         private Dictionary<int, string> _yearStarts;
         private Dictionary<int, NepaliSambatYear> _nepaliSambat;
-        private HashSet<int> _holidayYears;
+        private HashSet<int> _eventYears;
         private Dictionary<int, YearMeta> _monthMeta;
 
         public DataSeeder(ApiClient api, string dataDir)
@@ -32,9 +31,24 @@ namespace NepaliCalendarDataSeeder.Services
             _dataDir = dataDir;
         }
 
-        public async Task<int> RunAsync(DateTime adDate, int targetOffset, int? maxYear)
+        public async Task<int> RunAsync(
+            DateTime adDate,
+            int targetOffset,
+            int? maxYear,
+            int? detailsYear = null,
+            int? detailsMonth = null)
         {
             LoadExisting();
+
+            if (detailsYear.HasValue)
+            {
+                if (detailsMonth.HasValue && (detailsMonth.Value < 1 || detailsMonth.Value > 12))
+                    throw new ArgumentOutOfRangeException(nameof(detailsMonth), "Details month must be between 1 and 12.");
+
+                var detailRecord = await RefreshYearDetailsAsync(detailsYear.Value, detailsMonth);
+                WriteSeedInfo(new List<SeedRecord> { detailRecord }, adDate, ComputeCurrentBsYear(adDate), detailsYear.Value);
+                return 1;
+            }
 
             var currentBsYear = ComputeCurrentBsYear(adDate);
             var targetBsYear = maxYear ?? (currentBsYear + targetOffset);
@@ -87,14 +101,24 @@ namespace NepaliCalendarDataSeeder.Services
                 .OrderBy(y => y)
                 .ToList();
 
-            if (refreshable.Count > 0)
+            if (detailsYear.HasValue)
+            {
+                // An explicit detail refresh is intentionally isolated. Do not spend hours
+                // refreshing unrelated provisional years before the requested daily file.
+                refreshable = new List<int>();
+            }
+            else if (refreshable.Count > 0)
+            {
                 Console.WriteLine($"Re-checking provisional/partial years   : {string.Join(", ", refreshable)}");
+            }
 
-            var targets = refreshable
-                .Concat(Enumerable.Range(startYear, Math.Max(0, targetBsYear - startYear + 1)))
-                .Distinct()
-                .OrderBy(y => y)
-                .ToList();
+            var targets = detailsYear.HasValue
+                ? new List<int> { detailsYear.Value }
+                : refreshable
+                    .Concat(Enumerable.Range(startYear, Math.Max(0, targetBsYear - startYear + 1)))
+                    .Distinct()
+                    .OrderBy(y => y)
+                    .ToList();
 
             var records = new List<SeedRecord>();
 
@@ -105,7 +129,16 @@ namespace NepaliCalendarDataSeeder.Services
                 Console.WriteLine(
                     $"Year {year}: months={record.KnownMonths}/12 " +
                     $"verified={(record.Verified ? "Y" : "n")} " +
-                    $"year-start={(record.YearStart ? "Y" : "n")} holidays={record.HolidayCount} ns={(record.NepaliSambat ? "Y" : "n")}");
+                    $"year-start={(record.YearStart ? "Y" : "n")} events={record.EventCount} " +
+                    $"details={record.DayDetailsCount} ns={(record.NepaliSambat ? "Y" : "n")}");
+            }
+
+            if (detailsYear.HasValue && !targets.Contains(detailsYear.Value))
+            {
+                var record = await RefreshYearDetailsAsync(detailsYear.Value, detailsMonth);
+                records.Add(record);
+                Console.WriteLine(
+                    $"Year {record.Year}: events={record.EventCount} details={record.DayDetailsCount} (forced refresh)");
             }
 
             if (records.Count == 0)
@@ -275,19 +308,40 @@ namespace NepaliCalendarDataSeeder.Services
                 record.Verified = verified;
                 UpsertMeta(year, verified, record.KnownMonths, yearStartVerified);
 
-                // 3) Government holidays.
-                var holidays = await _api.GetGovernmentHolidaysAsync(year);
-                if (holidays == null || holidays.Count == 0)
+                // 3) All event occurrences returned by the endpoint. The endpoint name says
+                // "government holidays", but the payload also contains festivals and regional
+                // or international observances.
+                var events = await _api.GetGovernmentHolidaysAsync(year);
+                if (events == null)
                 {
-                    Console.WriteLine($"Year {year}: no government holiday data yet, holidays skipped.");
+                    Console.WriteLine($"Year {year}: no event data yet, events skipped.");
                 }
                 else
                 {
-                    var outputs = MapHolidays(holidays);
-                    WriteJson(Path.Combine(_dataDir, "Holidays", $"{year}.json"), outputs);
-                    _holidayYears.Add(year);
-                    record.HolidayCount = outputs.Count;
-                    Console.WriteLine($"Year {year}: holidays written ({outputs.Count}).");
+                    var outputs = MapEvents(events);
+                    WriteJson(Path.Combine(_dataDir, "Events", $"{year}.json"), outputs);
+                    _eventYears.Add(year);
+                    record.EventCount = outputs.Count;
+                    Console.WriteLine($"Year {year}: events written ({outputs.Count}).");
+                }
+
+                var dayDetails = await FetchDayDetailsAsync(year);
+                // Mirror the detail-refresh guard: a transient API gap can return fewer days than
+                // the published month lengths, and that partial list must neither overwrite a
+                // complete DayDetails file nor become the file of record.
+                var expectedDays = _monthLengths.TryGetValue(year, out var knownLengths) && knownLengths != null
+                    ? knownLengths.Sum()
+                    : 0;
+                if (dayDetails.Count > 0 && dayDetails.Count == expectedDays)
+                {
+                    WriteJson(Path.Combine(_dataDir, "DayDetails", $"{year}.json"), dayDetails);
+                    record.DayDetailsCount = dayDetails.Count;
+                    Console.WriteLine($"Year {year}: day details written ({dayDetails.Count}).");
+                }
+                else if (dayDetails.Count > 0)
+                {
+                    Console.WriteLine(
+                        $"Year {year}: day details incomplete ({dayDetails.Count}/{expectedDays}), existing file kept.");
                 }
             }
             catch (Exception ex)
@@ -298,11 +352,114 @@ namespace NepaliCalendarDataSeeder.Services
             return record;
         }
 
-        private List<HolidayOutput> MapHolidays(List<GovernmentHolidayResponse> holidays)
+        private async Task<SeedRecord> RefreshYearDetailsAsync(int year, int? month)
         {
-            var results = new List<HolidayOutput>();
+            var record = new SeedRecord { Year = year };
+            try
+            {
+                var events = await _api.GetGovernmentHolidaysAsync(year);
+                if (events != null)
+                {
+                    var outputs = MapEvents(events);
+                    WriteJson(Path.Combine(_dataDir, "Events", $"{year}.json"), outputs);
+                    _eventYears.Add(year);
+                    record.EventCount = outputs.Count;
+                    Console.WriteLine($"Year {year}: events written ({outputs.Count}).");
+                }
+                else
+                {
+                    Console.WriteLine($"Year {year}: no event data yet, events skipped.");
+                }
 
-            foreach (var h in holidays)
+                var partialPath = Path.Combine(_dataDir, "DayDetails", $".partial-{year}.json");
+                var existing = ReadJson<List<DayDetailsOutput>>(partialPath) ?? new List<DayDetailsOutput>();
+                var details = await FetchDayDetailsAsync(year, month, existing);
+
+                if (!_monthLengths.TryGetValue(year, out var lengths) || lengths == null || lengths.Length != 12)
+                {
+                    Console.WriteLine($"Year {year}: complete month lengths unavailable; partial day details retained.");
+                    WriteJson(partialPath, details);
+                    record.DayDetailsCount = details.Count;
+                }
+                else if (details.Count == lengths.Sum())
+                {
+                    WriteJson(Path.Combine(_dataDir, "DayDetails", $"{year}.json"),
+                        details.OrderBy(x => x.adDate, StringComparer.Ordinal).ToList());
+                    File.Delete(partialPath);
+                    record.DayDetailsCount = details.Count;
+                    Console.WriteLine($"Year {year}: complete day details written ({details.Count}).");
+                }
+                else
+                {
+                    WriteJson(partialPath, details);
+                    record.DayDetailsCount = details.Count;
+                    Console.WriteLine($"Year {year}: partial day details retained ({details.Count}/{lengths.Sum()}).");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Year {year}: detail refresh ERROR - {ex.Message}");
+            }
+
+            return record;
+        }
+
+        private async Task<List<DayDetailsOutput>> FetchDayDetailsAsync(
+            int year,
+            int? requestedMonth = null,
+            List<DayDetailsOutput> existing = null)
+        {
+            var results = existing ?? new List<DayDetailsOutput>();
+            if (!_monthLengths.TryGetValue(year, out var lengths) || lengths == null || lengths.Length == 0)
+            {
+                Console.WriteLine($"Year {year}: no month lengths, day details skipped.");
+                return results;
+            }
+
+            // A prefix of month lengths is enough for date conversion, but it is not a
+            // complete calendar year. Never publish a partial DayDetails file.
+            if (lengths.Length != 12)
+            {
+                Console.WriteLine($"Year {year}: month lengths are incomplete ({lengths.Length}/12), day details skipped.");
+                return results;
+            }
+
+            var firstMonth = requestedMonth ?? 1;
+            var lastMonth = requestedMonth ?? lengths.Length;
+
+            for (var month = firstMonth; month <= lastMonth; month++)
+            {
+                results.RemoveAll(x => x.bsMonth == month);
+                for (var day = 1; day <= lengths[month - 1]; day++)
+                {
+                    var response = await _api.ConvertBsAsync(year, month, day);
+                    if (response == null || string.IsNullOrWhiteSpace(response.Ad))
+                        continue;
+
+                    results.Add(new DayDetailsOutput
+                    {
+                        adDate = response.Ad,
+                        bsMonth = response.BsMonth ?? month,
+                        bsDay = response.BsDay ?? day,
+                        tithi = response.Tithi,
+                        chandrama = response.Chandrama,
+                        nsMonth = response.NsMonth,
+                        nsYear = response.NsYear,
+                        isVerified = response.IsVerified == 1
+                    });
+                }
+
+                Console.WriteLine($"Year {year}: day details month {month}/{lengths.Length} complete ({results.Count} day(s)).");
+            }
+
+            return results.OrderBy(x => x.adDate, StringComparer.Ordinal).ToList();
+        }
+
+        private List<EventOutput> MapEvents(List<GovernmentHolidayResponse> events)
+        {
+            var results = new List<EventOutput>();
+
+            foreach (var h in events)
             {
                 // Parse BS "dd.mm.yyyy" -> month, day.
                 var parts = (h.Bs ?? string.Empty).Split('.');
@@ -312,48 +469,77 @@ namespace NepaliCalendarDataSeeder.Services
                 if (!int.TryParse(parts[1], out var month) || !int.TryParse(parts[0], out var day))
                     continue;
 
-                var englishName = ExtractEnglishName(h.Description);
-                if (string.IsNullOrWhiteSpace(englishName))
-                    englishName = h.Title; // fall back to (Nepali) title
+                var metadata = ParseDescription(h.Description);
+                var englishName = metadata.En;
+                var nepaliName = metadata.Ne;
+                if (string.IsNullOrWhiteSpace(englishName)) englishName = h.Title;
 
-                results.Add(new HolidayOutput
+                var adDate = string.IsNullOrWhiteSpace(h.Ad) ? h.EventDate : h.Ad;
+                results.Add(new EventOutput
                 {
-                    month = month,
-                    day = day,
-                    date = h.Ad,
-                    name = englishName
+                    adDate = adDate,
+                    bsMonth = month,
+                    bsDay = day,
+                    nsYear = h.NsYear,
+                    nsMonth = h.NsMonth,
+                    nameEn = englishName,
+                    nameNe = nepaliName,
+                    holidayType = h.HolidayType,
+                    category = metadata.Category,
+                    basedOn = h.BasedOn,
+                    isGovernmentHoliday = IsTrue(metadata.Gh),
+                    isImportant = IsTrue(metadata.ImportantEvent)
                 });
             }
 
             // Keep deterministic ordering: prefer AD date, then month/day.
             return results
-                .OrderBy(x => x.date, StringComparer.Ordinal)
-                .ThenBy(x => x.month)
-                .ThenBy(x => x.day)
+                .OrderBy(x => x.adDate, StringComparer.Ordinal)
+                .ThenBy(x => x.bsMonth)
+                .ThenBy(x => x.bsDay)
+                .ThenBy(x => x.nameEn, StringComparer.Ordinal)
                 .ToList();
         }
 
-        private static string ExtractEnglishName(string descriptionJson)
+        private static bool IsTrue(string value) => value == "1" ||
+            string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+
+        private sealed class DescriptionMetadata
         {
-            if (string.IsNullOrWhiteSpace(descriptionJson)) return null;
+            public string En { get; set; }
+            public string Ne { get; set; }
+            public string Category { get; set; }
+            public string Gh { get; set; }
+            public string ImportantEvent { get; set; }
+        }
+
+        private static DescriptionMetadata ParseDescription(string descriptionJson)
+        {
+            var metadata = new DescriptionMetadata();
+            if (string.IsNullOrWhiteSpace(descriptionJson)) return metadata;
             try
             {
                 using var doc = JsonDocument.Parse(descriptionJson);
-                if (doc.RootElement.TryGetProperty("en", out var en))
-                {
-                    var value = en.GetString();
-                    if (string.IsNullOrWhiteSpace(value)) return null;
-                    // Remove backslashes that appear in some API descriptions.
-                    return value.Replace("\\", "").Trim();
-                }
+                metadata.En = GetString(doc.RootElement, "en");
+                metadata.Ne = GetString(doc.RootElement, "ne");
+                metadata.Category = GetString(doc.RootElement, "category");
+                metadata.Gh = GetString(doc.RootElement, "gh");
+                metadata.ImportantEvent = GetString(doc.RootElement, "important_event");
             }
             catch
             {
-                // Not JSON -> treat the raw string as the name.
+                metadata.En = descriptionJson.Replace("\\", "").Trim();
             }
 
-            var raw = descriptionJson.Replace("\\", "").Trim();
-            return raw;
+            return metadata;
+        }
+
+        private static string GetString(JsonElement root, string property)
+        {
+            if (!root.TryGetProperty(property, out var value)) return null;
+            return value.ValueKind == JsonValueKind.String
+                ? value.GetString()?.Replace("\\", "").Trim()
+                : value.ToString();
         }
 
         private void LoadExisting()
@@ -363,14 +549,14 @@ namespace NepaliCalendarDataSeeder.Services
             _monthMeta = ReadJson<Dictionary<int, YearMeta>>("month-meta.json") ?? new Dictionary<int, YearMeta>();
             _nepaliSambat = ReadJson<Dictionary<int, NepaliSambatYear>>("nepali-sambat.json") ?? new Dictionary<int, NepaliSambatYear>();
 
-            _holidayYears = new HashSet<int>();
-            var holidaysDir = Path.Combine(_dataDir, "Holidays");
-            if (Directory.Exists(holidaysDir))
+            _eventYears = new HashSet<int>();
+            var eventsDir = Path.Combine(_dataDir, "Events");
+            if (Directory.Exists(eventsDir))
             {
-                foreach (var file in Directory.GetFiles(holidaysDir, "*.json"))
+                foreach (var file in Directory.GetFiles(eventsDir, "*.json"))
                 {
                     var name = Path.GetFileNameWithoutExtension(file);
-                    if (int.TryParse(name, out var yr)) _holidayYears.Add(yr);
+                    if (int.TryParse(name, out var yr)) _eventYears.Add(yr);
                 }
             }
         }

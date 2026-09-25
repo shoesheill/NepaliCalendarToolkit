@@ -6,9 +6,11 @@ import {
   convertToAd,
   getMonthDateInAd,
   getYearDateRangeInAd,
-  getHolidaysAndWeekends,
   getAvailableCalendarYearsBs,
   getCurrentDateInfo,
+  getDayDetails,
+  getEvents,
+  getEventsForDate,
   configureWeekendDays,
   isWeekend,
 } from "../dist/index.js";
@@ -43,12 +45,22 @@ configureWeekendDays(6); // Saturday only
 assert.ok(isWeekend(6) && !isWeekend(0));
 configureWeekendDays(0, 6);
 
-// Holidays for a recent year (needs holiday data in baseline)
+// Rich events and daily details are separate data sets.
 const years = getAvailableCalendarYearsBs();
 console.log(`Supported BS years: ${years.minYear}-${years.maxYear}`);
-const holidays = await getHolidaysAndWeekends(2081, undefined, "holidays");
-assert.ok(Array.isArray(holidays));
-console.log(`Holidays for 2081 BS: ${holidays.length}`);
+const events = await getEvents(2081);
+assert.ok(Array.isArray(events));
+console.log(`Events for 2081 BS: ${events.length}`);
+
+const sample = await getDayDetails(new NepaliDate(2083, 6, 5));
+assert.strictEqual(sample.adDate, "2026-09-21");
+assert.strictEqual(sample.tithi, 10);
+assert.strictEqual(sample.chandrama, 21);
+assert.strictEqual(sample.nsYear, 1146);
+assert.strictEqual(sample.paksha, "शुक्ल");
+assert.strictEqual(sample.bsDate.toString(), "2083-06-05");
+const eventsForDate = await getEventsForDate(new NepaliDate(2081, 7, 17));
+assert.ok(Array.isArray(eventsForDate));
 
 const info = await getCurrentDateInfo();
 console.log("Current date:", info.date.toString(), `(${info.monthName})`, "AD:", info.adDate);

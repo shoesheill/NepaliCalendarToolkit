@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dataDir = join(root, "src", "data");
 
-/** CDN-relative paths, e.g. "month-lengths.json", "Holidays/2081.json". */
+/** CDN-relative paths, e.g. "month-lengths.json", "Events/2083.json". */
 function collect(dir, prefix = "") {
   const out = [];
   for (const entry of readdirSync(dir).sort()) {

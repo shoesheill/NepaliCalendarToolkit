@@ -7,8 +7,8 @@ using System.Text.Json;
 namespace NepaliCalendarToolkit.Helpers
 {
     /// <summary>
-    ///     Tiered data provider that resolves toolkit data (month lengths, year starts and
-    ///     holidays) in this order: <b>live CDN</b> → <b>persistent disk cache</b> →
+    ///     Tiered data provider that resolves toolkit data (month lengths, year starts, daily
+    ///     details and events) in this order: <b>live CDN</b> → <b>persistent disk cache</b> →
     ///     <b>embedded baseline</b>. This keeps the data fresh whenever the device is online,
     ///     and fully functional when it is offline.
     /// </summary>
@@ -18,7 +18,7 @@ namespace NepaliCalendarToolkit.Helpers
         private static readonly string CacheDirectory;
 
         /// <summary>
-        ///     Root URL of the data repository (a jsDelivr or plain HTTP host). This is
+        ///     Root URL of the data folder (an HTTPS host such as the project's CDN mirror). This is
         ///     intentionally <b>not hard-coded</b>: it is read from the
         ///     <c>DATA_URL</c> environment variable at startup, or set
         ///     explicitly via <see cref="Configure"/>. Remains empty when not configured.
@@ -76,7 +76,7 @@ namespace NepaliCalendarToolkit.Helpers
         ///     strategy described in the class summary.
         /// </summary>
         /// <typeparam name="T">Type to deserialize the JSON into.</typeparam>
-        /// <param name="path">Path relative to the base URL (e.g. "month-lengths.json" or "Holidays/2083.json").</param>
+        /// <param name="path">Path relative to the base URL (e.g. "month-lengths.json", "Events/2083.json" or "DayDetails/2083.json").</param>
         /// <param name="fallback">Value returned when the CDN and cache are both unavailable (default <c>null</c>).</param>
         /// <returns>Deserialized data, or <paramref name="fallback"/> on failure.</returns>
         public static T GetData<T>(string path, T fallback = default)
@@ -122,7 +122,7 @@ namespace NepaliCalendarToolkit.Helpers
         ///     used on a true first run with no network and no cache.
         /// </summary>
         /// <typeparam name="T">Type to deserialize the JSON into.</typeparam>
-        /// <param name="resourceKey">Suffix of the embedded resource name, e.g. "month-lengths.json" or "Holidays/2073.json".</param>
+        /// <param name="resourceKey">Suffix of the embedded resource name, e.g. "month-lengths.json" or "Events/2083.json".</param>
         /// <returns>Deserialized data, or <c>default</c> if the resource is missing or unreadable.</returns>
         public static T GetEmbedded<T>(string resourceKey)
         {
@@ -130,11 +130,16 @@ namespace NepaliCalendarToolkit.Helpers
             {
                 var assembly = typeof(DataProvider).Assembly;
                 // Embedded resources replace directory separators with dots
-                // (e.g. "Holidays/2083.json" -> "...Holidays.2083.json"), so normalise the key.
+                // (e.g. "Events/2083.json" -> "...Events.2083.json"), so normalise both the
+                // lookup key and the stored resource names before comparing. Resource names
+                // keep the separators the build OS used (backslash on Windows, slash on Unix),
+                // so both are folded to dots here.
                 var normalizedKey = resourceKey.Replace('/', '.').TrimStart('.');
 
                 var fullName = assembly.GetManifestResourceNames()
-                    .FirstOrDefault(n => n.EndsWith(normalizedKey, StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefault(n => n.Replace('\\', '.').Replace('/', '.')
+                        .EndsWith(normalizedKey, StringComparison.OrdinalIgnoreCase));
+                // Kept as a single lookup so trimming-unsafe LINQ stays off the hot path.
 
                 if (fullName == null) return default;
 

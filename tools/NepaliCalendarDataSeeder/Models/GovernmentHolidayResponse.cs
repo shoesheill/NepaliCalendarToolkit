@@ -9,8 +9,8 @@ namespace NepaliCalendarDataSeeder.Models
     /// </summary>
     public class GovernmentHolidayResponse
     {
-        [JsonPropertyName("event_id")] public string EventId { get; set; }
         [JsonPropertyName("event_date")] public string EventDate { get; set; }
+        [JsonPropertyName("holiday_type")] public string HolidayType { get; set; }
         [JsonPropertyName("ad")] public string Ad { get; set; }
         [JsonPropertyName("bs")] public string Bs { get; set; }
         [JsonPropertyName("ns_year")] public int NsYear { get; set; }

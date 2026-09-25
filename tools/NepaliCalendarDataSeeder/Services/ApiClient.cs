@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -23,6 +24,8 @@ namespace NepaliCalendarDataSeeder.Services
 
         private readonly HttpClient _http;
         private readonly string _baseUrl;
+        private readonly TimeSpan _minimumRequestInterval;
+        private DateTime _lastRequestUtc;
 
         public string BaseUrlForLogging => _baseUrl;
 
@@ -47,6 +50,12 @@ namespace NepaliCalendarDataSeeder.Services
             _http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(100) };
             _http.DefaultRequestHeaders.Add("User-Agent", "NepaliCalendarDataSeeder/1.0");
             _http.DefaultRequestHeaders.Add("Accept", "application/json, text/plain, */*");
+
+            var delayMs = 100;
+            if (int.TryParse(Environment.GetEnvironmentVariable("API_MIN_DELAY_MS"), out var configuredDelayMs))
+                delayMs = Math.Max(0, configuredDelayMs);
+            _minimumRequestInterval = TimeSpan.FromMilliseconds(delayMs);
+            _lastRequestUtc = DateTime.MinValue;
         }
 
         /// <summary>
@@ -82,22 +91,26 @@ namespace NepaliCalendarDataSeeder.Services
         /// </summary>
         public async Task<DateConvertResponse> ConvertBsAsync(int bsYear, int bsMonth, int bsDay)
         {
-            var payload = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["date"] = $"{bsYear:D4}-{bsMonth:D2}-{bsDay:D2}",
-                ["based_on"] = "BS"
-            });
-
             return await WithRetryAsync(async () =>
             {
+                await WaitBeforeRequestAsync();
+                using var payload = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["date"] = $"{bsYear:D4}-{bsMonth:D2}-{bsDay:D2}",
+                    ["based_on"] = "BS"
+                });
                 using var response = await _http.PostAsync($"{_baseUrl}/calendars/dateConvert", payload);
                 var text = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                     throw new HttpRequestException(
-                        $"dateConvert failed ({response.StatusCode}) for {bsYear:D4}-{bsMonth:D2}-{bsDay:D2}: {text}");
+                        $"dateConvert failed ({response.StatusCode}) for {bsYear:D4}-{bsMonth:D2}-{bsDay:D2}: {text}",
+                        null,
+                        response.StatusCode);
 
-                return JsonSerializer.Deserialize<DateConvertResponse>(text, JsonOptions());
+                var result = JsonSerializer.Deserialize<DateConvertResponse>(text, JsonOptions());
+                ValidateDateConvert(result, bsYear, bsMonth, bsDay);
+                return result;
             });
         }
 
@@ -110,13 +123,48 @@ namespace NepaliCalendarDataSeeder.Services
             var url = $"{_baseUrl}/goverment-holidays/{bsYear}";
             return await WithRetryAsync(async () =>
             {
-                var text = await _http.GetStringAsync(url);
+                await WaitBeforeRequestAsync();
+                using var response = await _http.GetAsync(url);
+                var text = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                    throw new HttpRequestException(
+                        $"government events failed ({response.StatusCode}) for BS {bsYear}: {text}",
+                        null,
+                        response.StatusCode);
 
                 if (string.IsNullOrWhiteSpace(text) || text.TrimStart().StartsWith("{"))
                     return null; // JSON object (error envelope) -> not available yet
 
-                return JsonSerializer.Deserialize<List<GovernmentHolidayResponse>>(text, JsonOptions());
+                var result = JsonSerializer.Deserialize<List<GovernmentHolidayResponse>>(text, JsonOptions());
+                if (result == null) throw new JsonException($"Invalid event response for BS {bsYear}.");
+                return result;
             });
+        }
+
+        private async Task WaitBeforeRequestAsync()
+        {
+            var elapsed = DateTime.UtcNow - _lastRequestUtc;
+            var remaining = _minimumRequestInterval - elapsed;
+            if (remaining > TimeSpan.Zero)
+                await Task.Delay(remaining);
+            _lastRequestUtc = DateTime.UtcNow;
+        }
+
+        private static void ValidateDateConvert(DateConvertResponse response, int year, int month, int day)
+        {
+            if (response == null || string.IsNullOrWhiteSpace(response.Ad))
+                throw new JsonException($"dateConvert returned no AD date for {year:D4}-{month:D2}-{day:D2}.");
+
+            if (!DateTime.TryParseExact(response.Ad, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out _))
+                throw new JsonException($"dateConvert returned invalid AD date '{response.Ad}'.");
+
+            if (response.BsYear.HasValue && response.BsYear.Value != year ||
+                response.BsMonth.HasValue && response.BsMonth.Value != month ||
+                response.BsDay.HasValue && response.BsDay.Value != day)
+                throw new JsonException(
+                    $"dateConvert returned mismatched BS date for {year:D4}-{month:D2}-{day:D2}: " +
+                    $"{response.BsYear:D4}-{response.BsMonth:D2}-{response.BsDay:D2}.");
         }
 
         /// <summary>
@@ -148,7 +196,10 @@ namespace NepaliCalendarDataSeeder.Services
         private static bool IsTransient(Exception ex)
         {
             return ex is TaskCanceledException or OperationCanceledException
-                || (ex is HttpRequestException h && h.InnerException is SocketException);
+                || (ex is HttpRequestException h &&
+                    (h.InnerException is SocketException ||
+                     h.StatusCode == HttpStatusCode.TooManyRequests ||
+                     (h.StatusCode.HasValue && (int)h.StatusCode.Value >= 500)));
         }
 
         private static JsonSerializerOptions JsonOptions()
