@@ -34,7 +34,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)/../README.md" Pack="true" PackagePath="\"/>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="assets\nepali-calendar-toolkit-dotnet-overview.svg" Pack="true" PackagePath="assets\"/>
     </ItemGroup>
 
     <ItemGroup>

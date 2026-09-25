@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Nepali Calendar Toolkit for .NET</title>
+  <desc id="desc">A visual overview of AD and BS conversion, Nepali reporting ranges, holidays, weekends, and current date information.</desc>
+
+  <rect width="1600" height="900" fill="#F8F7FC"/>
+  <rect x="56" y="52" width="1488" height="796" rx="28" fill="#FFFFFF" stroke="#E7E3F2" stroke-width="2"/>
+
+  <rect x="56" y="52" width="1488" height="188" rx="28" fill="#30245E"/>
+  <rect x="56" y="180" width="1488" height="60" fill="#30245E"/>
+  <circle cx="124" cy="126" r="34" fill="#8D78E8"/>
+  <path d="M108 112h32v28h-32z M103 118h42 M116 106v12 M132 106v12" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="184" y="122" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="48" font-weight="700">Nepali Calendar Toolkit</text>
+  <text x="184" y="170" fill="#DCD6F7" font-family="Segoe UI, Arial, sans-serif" font-size="23">A .NET toolkit for Bikram Sambat dates and Nepal-focused reporting periods</text>
+  <text x="1408" y="126" text-anchor="end" fill="#C9C0F0" font-family="Segoe UI, Arial, sans-serif" font-size="19">.NET library</text>
+  <text x="1408" y="158" text-anchor="end" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600">नेपाली पात्रो</text>
+
+  <rect x="92" y="278" width="656" height="228" rx="20" fill="#F3F0FF" stroke="#DDD6FA" stroke-width="2"/>
+  <circle cx="140" cy="330" r="25" fill="#6B55D9"/>
+  <path d="M128 330h24 M140 318v24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="184" y="338" fill="#30245E" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">AD ⇄ BS Conversion</text>
+  <text x="128" y="393" fill="#6D6685" font-family="Segoe UI, Arial, sans-serif" font-size="19">Gregorian date</text>
+  <text x="128" y="430" fill="#30245E" font-family="Segoe UI, Arial, sans-serif" font-size="31" font-weight="700">2025-04-14</text>
+  <path d="M382 422h68" stroke="#8D78E8" stroke-width="5" stroke-linecap="round"/>
+  <path d="M440 407l16 15-16 15" fill="none" stroke="#8D78E8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="516" y="393" fill="#6D6685" font-family="Segoe UI, Arial, sans-serif" font-size="19">Bikram Sambat</text>
+  <text x="516" y="430" fill="#30245E" font-family="Segoe UI, Arial, sans-serif" font-size="31" font-weight="700">2082-01-01</text>
+
+  <rect x="92" y="534" width="656" height="256" rx="20" fill="#F0F8F7" stroke="#CDE9E3" stroke-width="2"/>
+  <circle cx="140" cy="587" r="25" fill="#238B7A"/>
+  <path d="M128 587h24 M140 575v24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="184" y="595" fill="#174F47" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">Nepali Reporting Periods</text>
+  <text x="128" y="647" fill="#50766F" font-family="Segoe UI, Arial, sans-serif" font-size="18">AD start and end dates for common business periods</text>
+  <rect x="128" y="678" width="132" height="58" rx="12" fill="#FFFFFF" stroke="#B7DCD5" stroke-width="2"/>
+  <text x="194" y="701" text-anchor="middle" fill="#50766F" font-family="Segoe UI, Arial, sans-serif" font-size="15">MONTH</text>
+  <text x="194" y="725" text-anchor="middle" fill="#174F47" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Baisakh</text>
+  <rect x="280" y="678" width="132" height="58" rx="12" fill="#FFFFFF" stroke="#B7DCD5" stroke-width="2"/>
+  <text x="346" y="701" text-anchor="middle" fill="#50766F" font-family="Segoe UI, Arial, sans-serif" font-size="15">QUARTER</text>
+  <text x="346" y="725" text-anchor="middle" fill="#174F47" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Q1</text>
+  <rect x="432" y="678" width="176" height="58" rx="12" fill="#FFFFFF" stroke="#B7DCD5" stroke-width="2"/>
+  <text x="520" y="701" text-anchor="middle" fill="#50766F" font-family="Segoe UI, Arial, sans-serif" font-size="15">FISCAL YEAR</text>
+  <text x="520" y="725" text-anchor="middle" fill="#174F47" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">2081 / 82</text>
+
+  <rect x="780" y="278" width="304" height="228" rx="20" fill="#FFF7ED" stroke="#F6D9B1" stroke-width="2"/>
+  <circle cx="828" cy="330" r="25" fill="#C97824"/>
+  <path d="M816 330h24 M828 318v24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="872" y="338" fill="#754516" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Holidays</text>
+  <text x="816" y="394" fill="#9A7047" font-family="Segoe UI, Arial, sans-serif" font-size="18">Public holiday results</text>
+  <text x="816" y="432" fill="#754516" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">By year or month</text>
+  <path d="M816 462h190" stroke="#E9C28F" stroke-width="2"/>
+  <text x="816" y="487" fill="#9A7047" font-family="Segoe UI, Arial, sans-serif" font-size="16">AD and BS dates included</text>
+
+  <rect x="1116" y="278" width="376" height="228" rx="20" fill="#F9F0F8" stroke="#EBCFE5" stroke-width="2"/>
+  <circle cx="1164" cy="330" r="25" fill="#A04784"/>
+  <path d="M1152 330h24 M1164 318v24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="1208" y="338" fill="#6F285A" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Weekends</text>
+  <text x="1152" y="394" fill="#8F5D7D" font-family="Segoe UI, Arial, sans-serif" font-size="18">Configurable weekend days</text>
+  <rect x="1152" y="420" width="82" height="38" rx="19" fill="#A04784"/>
+  <text x="1193" y="446" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">SAT</text>
+  <rect x="1246" y="420" width="82" height="38" rx="19" fill="#A04784"/>
+  <text x="1287" y="446" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">SUN</text>
+  <text x="1152" y="487" fill="#8F5D7D" font-family="Segoe UI, Arial, sans-serif" font-size="16">Choose any day combination</text>
+
+  <rect x="780" y="534" width="712" height="256" rx="20" fill="#FFFFFF" stroke="#DCD8EA" stroke-width="2"/>
+  <text x="816" y="582" fill="#30245E" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">Current Date Summary</text>
+  <text x="816" y="616" fill="#6D6685" font-family="Segoe UI, Arial, sans-serif" font-size="17">One result for date, month, quarter, fiscal year, weekday, and weekend status</text>
+
+  <rect x="816" y="642" width="304" height="116" rx="14" fill="#FBFAFF" stroke="#DCD8EA" stroke-width="2"/>
+  <text x="842" y="674" fill="#6D6685" font-family="Segoe UI, Arial, sans-serif" font-size="15">TODAY IN BS</text>
+  <text x="842" y="710" fill="#30245E" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">2083-06-09</text>
+  <text x="842" y="737" fill="#6D6685" font-family="Segoe UI, Arial, sans-serif" font-size="15">Ashwin · Quarter 2</text>
+
+  <rect x="1144" y="642" width="308" height="116" rx="14" fill="#30245E"/>
+  <text x="1170" y="674" fill="#C9C0F0" font-family="Segoe UI, Arial, sans-serif" font-size="15">FISCAL CONTEXT</text>
+  <text x="1170" y="710" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">FY 2083 / 84</text>
+  <text x="1170" y="737" fill="#DCD6F7" font-family="Segoe UI, Arial, sans-serif" font-size="15">Week 2 · Friday · Working day</text>
+
+  <text x="92" y="824" fill="#77718D" font-family="Segoe UI, Arial, sans-serif" font-size="16">Conversion</text>
+  <circle cx="185" cy="818" r="5" fill="#6B55D9"/>
+  <text x="200" y="824" fill="#77718D" font-family="Segoe UI, Arial, sans-serif" font-size="16">Reporting periods</text>
+  <circle cx="346" cy="818" r="5" fill="#238B7A"/>
+  <text x="361" y="824" fill="#77718D" font-family="Segoe UI, Arial, sans-serif" font-size="16">Holidays and weekends</text>
+  <circle cx="535" cy="818" r="5" fill="#A04784"/>
+  <text x="550" y="824" fill="#77718D" font-family="Segoe UI, Arial, sans-serif" font-size="16">Current-date information</text>
+</svg>
